@@ -556,14 +556,14 @@ def calculate_metrics(n: pypsa.Network, label: str, metrics: pd.DataFrame):
         "line_volume_shadow",
         "co2_shadow",
         "co2_budget",
-        "electricity_consumption_mwh",
-        "peak_electricity_consumption_mw",
+        "gross_ac_withdrawal_mwh",
+        "peak_gross_ac_withdrawal_mw",
     ]
 
     metrics = metrics.reindex(pd.Index(metrics_list).union(metrics.index))
     electricity = electricity_consumption_by_province(n).sum(axis=1)
-    metrics.at["electricity_consumption_mwh", label] = electricity.dot(n.snapshot_weightings.generators)
-    metrics.at["peak_electricity_consumption_mw", label] = electricity.max()
+    metrics.at["gross_ac_withdrawal_mwh", label] = electricity.dot(n.snapshot_weightings.generators)
+    metrics.at["peak_gross_ac_withdrawal_mw", label] = electricity.max()
 
     metrics.at["line_volume_DC", label] = (n.links.length * n.links.p_nom_opt)[
         n.links.carrier == "DC"

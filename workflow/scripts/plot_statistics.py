@@ -357,6 +357,7 @@ def prepare_province_peakload_capacity_data(n, attached_carriers=None):
     peak_load = consumption.T.groupby(locations).sum().T.max()
     peak_load = peak_load / PLOT_CAP_UNITS  # ensure peak load is in GW
 
+    # "Peak Load" is retained as an internal column name for caller compatibility.
     # Calculate installed capacity per province and technology using optimal_capacity
     ds = n.statistics.optimal_capacity(
         groupby=["location", "carrier"], bus_carrier="AC"
@@ -429,11 +430,11 @@ def plot_province_peakload_capacity(df_plot, bar_cols, color_list, outp_dir):
             i,
             "r|",
             markersize=18,
-            label="Peak Load" if i == 0 else "",
+            label="Peak gross AC withdrawal" if i == 0 else "",
         )
     ax.set_xlabel("Capacity [GW]")
     ax.set_ylabel("Province")
-    ax.set_title("Peak Load vs Installed Capacity by Province")
+    ax.set_title("Peak gross AC withdrawal vs Installed Capacity by Province")
     ax.grid(False)
     # Only keep one Peak Load legend
     handles, labels = ax.get_legend_handles_labels()

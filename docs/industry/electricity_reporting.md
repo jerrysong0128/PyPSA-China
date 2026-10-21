@@ -1,10 +1,14 @@
-# Electricity reporting with material Loads
+# Gross AC withdrawal reporting with material Loads
 
 `plot_statistics.py` provincial peak demand and `make_summary.py` electricity
-metrics now use `industry_accounting.electricity_consumption_by_province`:
+metrics (`gross_ac_withdrawal_mwh`, `peak_gross_ac_withdrawal_mw`) now use `industry_accounting.electricity_consumption_by_province`:
 
 - Include fixed AC Loads, including static `p_set`, and solved AC-input conversion
-  Link `p0` (steel process electricity, electrolysis, heating and other conversion).
+  Link `p0` (steel process electricity, electrolysis, heating and battery charging).
+  This is **gross AC withdrawal**, not final electricity consumption. The PIK
+  battery charger runs AC → battery and is included; its separate discharger
+  runs battery → AC and is not subtracted. Charging can therefore increase this
+  metric even when final end-use demand is unchanged.
 - Exclude product Loads in t/h, non-electric Loads, and AC-to-AC transmission.
 - Aggregate AC buses by `Bus.location` before taking provincial maxima. Use the
   bus name when the location is absent. The system peak is the maximum of the
@@ -29,10 +33,10 @@ is unchanged. The shared consumption helper uses the model's signed AC-input
 conversion convention; this is not a final-energy-only or battery-loss-free
 metric for arbitrary reversible storage topologies.
 
-Validation: `tests/test_industry_reporting.py` contains three analytical-dispatch
-regressions covering material and heat exclusion, steel and H2 electricity,
+Validation: `tests/test_industry_reporting.py` contains four analytical-dispatch
+regressions covering battery charging/discharging, material and heat exclusion, steel and H2 electricity,
 static Loads, two AC buses in one province, transmission in both directions,
 non-uniform snapshot weights, simultaneous peaks, electricity-weighted prices,
-energy tables and industry-off pure-electric compatibility. All three passed
+energy tables and industry-off pure-electric compatibility. All four passed
 under the project's PyPSA 0.35 environment. These tests verify reporting formulas;
 they do not constitute a full national workflow run or validate industrial data.

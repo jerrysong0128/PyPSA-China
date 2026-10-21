@@ -68,9 +68,9 @@ def test_electricity_peak_includes_processes_excludes_tonnes_heat_and_transmissi
     assert "heat" not in technologies
     assert "steel" not in technologies
     metrics = calculate_metrics(n, "test", pd.DataFrame())
-    assert metrics.at["electricity_consumption_mwh", "test"] == pytest.approx(44)
+    assert metrics.at["gross_ac_withdrawal_mwh", "test"] == pytest.approx(44)
     # The simultaneous system peak is 14, not the sum of provincial peaks (15).
-    assert metrics.at["peak_electricity_consumption_mw", "test"] == pytest.approx(14)
+    assert metrics.at["peak_gross_ac_withdrawal_mw", "test"] == pytest.approx(14)
     prices = calculate_weighted_prices(n, "test", pd.DataFrame())
     assert prices.at["electricity", "test"] == pytest.approx(920 / 44)
 
@@ -95,7 +95,27 @@ def test_off_mode_preserves_fixed_electricity_and_static_loads():
     assert frame.at["Anhui", "Peak Load"] * PLOT_CAP_UNITS == pytest.approx(5)
     assert frame.at["Jiangsu", "Peak Load"] * PLOT_CAP_UNITS == pytest.approx(6)
     metrics = calculate_metrics(n, "test", pd.DataFrame())
-    assert metrics.at["electricity_consumption_mwh", "test"] == pytest.approx(27)
-    assert metrics.at["peak_electricity_consumption_mw", "test"] == pytest.approx(9)
+    assert metrics.at["gross_ac_withdrawal_mwh", "test"] == pytest.approx(27)
+    assert metrics.at["peak_gross_ac_withdrawal_mw", "test"] == pytest.approx(9)
     prices = calculate_weighted_prices(n, "test", pd.DataFrame())
     assert prices.at["electricity", "test"] == pytest.approx(630 / 27)
+
+
+def test_gross_ac_withdrawal_includes_battery_charging_without_discharge_credit():
+    n = reporting_network()
+    n.add("Carrier", "battery")
+    n.add("Bus", "A battery", carrier="battery", unit="MWh", location="Anhui")
+    n.add("Link", "battery charger", bus0="A", bus1="A battery", carrier="battery", efficiency=0.9, p_nom=5)
+    n.add("Link", "battery discharger", bus0="A battery", bus1="A", carrier="battery", efficiency=0.9, p_nom=5)
+    n.links_t.p0["battery charger"] = [5, 0]
+    n.links_t.p1["battery charger"] = [-4.5, 0]
+    n.links_t.p0["battery discharger"] = [0, 1.5]
+    n.links_t.p1["battery discharger"] = [0, -1.35]
+    # 4.5 MWh enters the battery; 1.5 MW over three weighted hours leaves it.
+    # Neither discharged energy nor round-trip losses define this gross metric.
+    n.generators_t.p["A grid"] += [5, -1.35]
+    metrics = calculate_metrics(n, "test", pd.DataFrame())
+    assert metrics.at["gross_ac_withdrawal_mwh", "test"] == pytest.approx(44 + 5)
+    assert metrics.at["peak_gross_ac_withdrawal_mw", "test"] == pytest.approx(14 + 5)
+    prices = calculate_weighted_prices(n, "test", pd.DataFrame())
+    assert prices.at["electricity", "test"] == pytest.approx((920 + 5 * 10) / 49)
