@@ -125,6 +125,25 @@ class GHGConfigHandler:
         else:
             from constants import CO2_EL_2020 as base_year_ems
 
+        industry = self.config.get("sectors", {}).get("industry", {})
+        active = self.config["scenario"].get("co2_pathway", [])
+        if isinstance(active, str):
+            active = [active]
+        requires_baseline = any(
+            name in active and scenario.get("control") == "reduction"
+            for name, scenario in self.config["co2_scenarios"].items()
+        )
+        if industry.get("mode", "off") == "endogenous" and requires_baseline:
+            from constants import PROV_NAMES
+            from industry_accounting import steel_baseline_emissions
+
+            baseline_path = industry.get("carbon_baseline")
+            if not baseline_path:
+                raise ValueError("Endogenous steel reduction scenarios require an evidenced 2020 carbon_baseline CSV")
+            steel_base = steel_baseline_emissions(baseline_path, PROV_NAMES)
+            base_year_ems += steel_base
+            self.config["sectors"]["industry"]["carbon_baseline_t"] = steel_base
+
         for name, co2_scen in self.config["co2_scenarios"].items():
             co2_scen["pathway"] = {int(k): v for k, v in co2_scen.get("pathway", {}).items()}
         self._reduction_to_budget(base_year_ems)

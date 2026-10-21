@@ -18,6 +18,10 @@ import xarray as xr
 from _helpers import ConfigManager, configure_logging, mock_snakemake, setup_gurobi_tunnel_and_env
 from _pypsa_helpers import filter_carriers, mock_solve, store_duals_to_network
 from constants import YEAR_HRS
+from industry_accounting import (
+    electrical_consumption_links, fixed_electricity_load, validate_industry_solution,
+)
+from industry_model import add_industry_constraints, chronological_hours
 from pypsa.descriptors import get_switchable_as_dense as get_as_dense
 
 pypsa.pf.logger.setLevel(logging.WARNING)
@@ -357,6 +361,12 @@ def prepare_network(
     """
 
     co2_opts = ConfigManager(config).fetch_co2_restriction(co2_pathway, int(plan_year))
+    if n.meta.get("industry"):
+        _, period_hours = chronological_hours(n)
+        if solve_opts.get("nhours"):
+            raise ValueError("Industry requires physical chronology; use snapshot start/end, not nhours reweighting")
+        if str(co2_opts["control"]).startswith("budget"):
+            co2_opts["co2_pr_or_limit"] *= period_hours / YEAR_HRS
     add_co2_constraints_prices(n, co2_opts)
 
     if "clip_p_max_pu" in solve_opts:
@@ -835,7 +845,7 @@ def add_operational_reserve_margin(n: pypsa.network, config):
     ac_buses = n.buses.query("carrier =='AC'").index  # noqa: F841
     attached_carriers = filter_carriers(n, "AC")  # noqa: F841
     # conceivably a link could have a negative efficiency and flow towards bus0 - don't consider
-    prod_links = n.links.query("carrier in @_attached_carriers & not bus0 in @_ac_buses")
+    prod_links = n.links.loc[n.links.bus1.isin(ac_buses) & ~n.links.bus0.isin(ac_buses)]
     transport_links = prod_links.bus0.map(n.buses.carrier) == prod_links.bus1.map(n.buses.carrier)
     prod_links = prod_links.loc[transport_links == False]
     prod_gen = n.generators.loc[ac_mask]
@@ -847,7 +857,7 @@ def add_operational_reserve_margin(n: pypsa.network, config):
     n.model.add_variables(0, np.inf, coords=[n.snapshots, prod_links.index], name="Link-r")
 
     # Define Reserve and weigh VRES by their mean availability ("capacity credit")
-    vres_gen = prod_gen.query("carrier in @_VRE_TECHS")
+    vres_gen = prod_gen.loc[prod_gen.carrier.isin(VRE_TECHS)]
     non_vre = prod_gen.index.difference(vres_gen.index)
     # full capacity credit for non-VRE producers (questionable, maybe should be weighted by availability)
     summed_reserve = (n.model["Link-r"] * prod_links.efficiency).sum("Link") + n.model[
@@ -856,7 +866,7 @@ def add_operational_reserve_margin(n: pypsa.network, config):
 
     # VRE capacity credit & margin reqs
     ext_idx = vres_gen.query("p_nom_extendable").index
-    avail = n.generators_t.p_max_pu.loc[:, vres_gen.index]
+    avail = get_as_dense(n, "Generator", "p_max_pu", inds=vres_gen.index)
     vres_idx = avail.columns
 
     if not vres_gen.empty:
@@ -865,7 +875,7 @@ def add_operational_reserve_margin(n: pypsa.network, config):
         summed_reserve += vre_reserve_score
     if not ext_idx.empty and not vres_idx.empty:
         # reqs from brownfield VRE generators. epsilon is the margin for VRES forecast error
-        avail_factor = n.generators_t.p_max_pu[ext_idx]
+        avail_factor = avail[ext_idx]
         p_nom_vres = n.model["Generator-p_nom"].loc[ext_idx].rename({"Generator-ext": "Generator"})
         vre_req_ext = (p_nom_vres * (EPSILON_VRES * xr.DataArray(avail_factor))).sum("Generator")
     else:
@@ -873,7 +883,7 @@ def add_operational_reserve_margin(n: pypsa.network, config):
 
     if not vres_idx.empty:
         # reqs extendable VRE generators
-        avail_factor = n.generators_t.p_max_pu[vres_idx.difference(ext_idx)]
+        avail_factor = avail[vres_idx.difference(ext_idx)]
         renewable_capacity = n.generators.p_nom[vres_idx.difference(ext_idx)]
         vre_req_fix = (avail_factor * renewable_capacity).sum(axis=1)
     else:
@@ -881,7 +891,12 @@ def add_operational_reserve_margin(n: pypsa.network, config):
 
     lhs = summed_reserve - vre_req_ext
     # Right-hand-side
-    demand = get_as_dense(n, "Load", "p_set").sum(axis=1)
+    demand = fixed_electricity_load(n)
+    # Material Loads are t/h, not MW. Process and other conversion electricity
+    # is an endogenous Link input and belongs on the variable side of the row.
+    consumers = electrical_consumption_links(n)
+    if len(consumers):
+        lhs -= EPSILON_LOAD * n.model["Link-p"].loc[:, consumers].sum("Link")
     rhs = EPSILON_LOAD * demand + EPSILON_VRES * vre_req_fix + CONTINGENCY
 
     n.model.add_constraints(lhs >= rhs, name="Reserve-margin")
@@ -897,18 +912,21 @@ def add_operational_reserve_margin(n: pypsa.network, config):
         dispatch = n.model[f"{component}-p"].loc[:, producer.index]
         reserve = n.model[f"{component}-r"].loc[:, ext_i.union(fix_i)]
 
-        capacity_variable = n.model[f"{component}-p_nom"].loc[ext_i]
-        capacity_variable = capacity_variable.rename({f"{component}-ext": f"{component}"})
-        capacity_fixed = getattr(n, component.lower() + "s").p_nom[fix_i]
-
         p_max_pu = get_as_dense(n, f"{component}", "p_max_pu")
-
         lhs = dispatch + reserve
-        # MAY have to check what happens in case pmaxpu is not defined for all items
-        rhs = capacity_variable * p_max_pu[ext_i] + (p_max_pu[fix_i] * capacity_fixed)
-        n.model.add_constraints(
-            lhs - rhs.loc[lhs.indexes] <= 0, name=f"{component}-p-reserve-upper"
-        )
+        if len(ext_i):
+            capacity_variable = n.model[f"{component}-p_nom"].loc[ext_i]
+            capacity_variable = capacity_variable.rename({f"{component}-ext": f"{component}"})
+            n.model.add_constraints(
+                lhs.loc[:, ext_i] <= capacity_variable * p_max_pu[ext_i],
+                name=f"{component}-ext-p-reserve-upper",
+            )
+        if len(fix_i):
+            capacity_fixed = getattr(n, component.lower() + "s").p_nom[fix_i]
+            n.model.add_constraints(
+                lhs.loc[:, fix_i] <= p_max_pu[fix_i] * capacity_fixed,
+                name=f"{component}-fix-p-reserve-upper",
+            )
 
 
 def extra_functionality(n: pypsa.Network, _) -> None:
@@ -925,6 +943,7 @@ def extra_functionality(n: pypsa.Network, _) -> None:
     add_battery_constraints(n)
     add_transmission_constraints(n)
     add_nuclear_expansion_constraints(n)
+    add_industry_constraints(n, n.snapshots)
 
     if config["heat_coupling"]:
         add_water_tank_charger_constraints(n, config)
@@ -997,6 +1016,11 @@ def solve_network(
         logger.warning(f"Solving status '{status}' with termination condition '{condition}'")
     if "infeasible" in condition:
         raise RuntimeError("Solving status 'infeasible'")
+
+    if n.meta.get("industry"):
+        if status != "ok" or condition != "optimal":
+            raise RuntimeError(f"Industry solve requires optimal termination: {status}, {condition}")
+        n.meta["industry_validation"] = validate_industry_solution(n)
 
     return n
 
