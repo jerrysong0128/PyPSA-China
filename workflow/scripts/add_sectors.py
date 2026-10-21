@@ -1,10 +1,11 @@
-"""Add basic EV loads and chargers to a PyPSA network."""
+"""Add independently configured EV and industrial sectors to a PyPSA network."""
 
 import logging
 
 import pandas as pd
 import pypsa
 from _helpers import configure_logging, mock_snakemake
+from industry_adapter import add_configured_industry, ev_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -97,50 +98,34 @@ def attach_simple_ev(
     )
 
 
+def add_configured_sectors(network, config, *, planning_year, inputs):
+    """Attach industry and optional EV categories without cross-dependencies.
+
+    The upstream aggregate electricity profile must retain its existing EV
+    accounting convention: when EV is enabled REMIND removes EV demand before
+    writing the AC profile. Industry shares therefore apply to that AC baseline.
+    """
+    network = add_configured_industry(network, config, planning_year=planning_year, inputs=inputs)
+    if not ev_enabled(config):
+        return network
+    nodes = network.buses.query("carrier == 'AC'").index
+    transport = config["sectors"]["electric_vehicles"].get("transport", {})
+    for category in ("passenger", "freight"):
+        options = transport.get(f"{category}_bev", {})
+        if options.get("enable", False):
+            charging = pd.read_csv(inputs[f"transport_demand_{category}"], index_col=0, parse_dates=True)
+            attach_simple_ev(network, charging, nodes, options, category)
+            logger.info("%s EV load added for %d nodes", category, len(charging.columns))
+    return network
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         snakemake = mock_snakemake("add_sectors", planning_horizons="2030")
     configure_logging(snakemake)
-
     network = pypsa.Network(snakemake.input.network)
-    nodes = network.buses.query("carrier == 'AC'").index
-
-    ev_cfg = snakemake.config.get("sectors", {}).get("electric_vehicles", {})
-    if not ev_cfg.get("enabled", False):
-        logger.info("EV sector disabled; exporting original network.")
-        network.export_to_netcdf(snakemake.output.network)
-        raise SystemExit(0)
-
-    transport_cfg = ev_cfg.get("transport", {})
-    logger.info("Transport configuration: %s", transport_cfg)
-
-    passenger_cfg = transport_cfg.get("passenger_bev", {})
-    if passenger_cfg.get("enable", False):
-        charging = pd.read_csv(
-            snakemake.input.transport_demand_passenger, index_col=0, parse_dates=True
-        )
-        attach_simple_ev(network, charging, nodes, passenger_cfg, "passenger")
-        logger.info(
-            "Passenger EV load added for %d nodes; snapshots %d",
-            len(charging.columns),
-            len(charging),
-        )
-    else:
-        logger.info("Passenger EV disabled; skipping.")
-
-    freight_cfg = transport_cfg.get("freight_bev", {})
-    if freight_cfg.get("enable", False):
-        charging = pd.read_csv(
-            snakemake.input.transport_demand_freight, index_col=0, parse_dates=True
-        )
-        attach_simple_ev(network, charging, nodes, freight_cfg, "freight")
-        logger.info(
-            "Freight EV load added for %d nodes; snapshots %d",
-            len(charging.columns),
-            len(charging),
-        )
-    else:
-        logger.info("Freight EV disabled; skipping.")
-
+    network = add_configured_sectors(network, snakemake.config,
+                                     planning_year=int(snakemake.wildcards.planning_horizons),
+                                     inputs=dict(snakemake.input.items()))
     network.export_to_netcdf(snakemake.output.network)
-    logger.info("Network with EV sectors exported to %s", snakemake.output.network)
+    logger.info("Network with configured sectors exported to %s", snakemake.output.network)

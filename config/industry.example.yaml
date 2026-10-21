@@ -1,0 +1,62 @@
+# Merge this with the normal configuration using --configfile.
+# Disabled by default: the paths below are explicit contracts, not bundled data.
+# All monetary inputs must share the energy network's currency AND price year.
+# Inputs must explicitly target planning year 2030. Project calibration-year
+# shares/quantities upstream; do not relabel historical absolute energy as 2030.
+# Raw downloads belong in data/industry/raw (gitignored); processed data and
+# processing code should retain source_id, estimate_flag and provenance records.
+sectors:
+  industry:
+    mode: "off"  # "off" | fixed_load | endogenous (quote off for YAML 1.1)
+    annual_sector_demand: data/industry/processed/sector_electricity_{planning_horizons}.csv
+    carbon_baseline: data/industry/processed/steel_direct_co2_baseline_2020.csv
+    # Required only for endogenous + CO2 reduction scenarios, to extend the
+    # power/heat 2020 baseline with steel DIRECT emissions. CSV columns:
+    # province,year,route,production_t,direct_co2_t_per_t,source_id,method.
+    # year=2020; explicit documented rows cover every model province. Use
+    # production, not nameplate capacity; omit indirect electricity/H2 emissions.
+    # This file is read during CONFIG PARSING: generate/verify it beforehand,
+    # not as a temporary product of this same DAG. Budget/price modes do not need it.
+    province_mapping: {}  # explicit source alias -> existing AC bus name
+    # annual_sector_demand CSV: year,province,sector,value,unit,source_id,estimate_flag
+    # unit=MWh; required sectors: agriculture,industry,construction,services,
+    # residential,steel,other_ferrous. Optional residual and other_industry must
+    # match parent-minus-children. Industry excludes construction; steel and
+    # other_ferrous are subsets of industry. Explicit zeros are required.
+    # Source metadata columns are accepted. No inferred province abbreviations.
+    # With EV enabled, shares apply to the upstream AC profile excluding the
+    # separately modeled EV categories, preserving the existing REMIND convention.
+    # The adapter reads the COMPLETE YEAR from the normal elec_load HDF /load
+    # (MW), optionally /weights (hours), and only then selects solve snapshots.
+    # Off preserves original loads; fixed_load partitions them; endogenous
+    # removes only steel baseline and adds steel-production electricity use.
+    steel:
+      annual_demand: data/industry/processed/steel_demand_{planning_horizons}.csv
+      capacities: data/industry/processed/steel_capacities_{planning_horizons}.csv
+      resources: data/industry/processed/steel_resources_{planning_horizons}.csv
+      routes: data/industry/processed/steel_routes_{planning_horizons}.yaml
+      inventory: data/industry/processed/steel_inventory_{planning_horizons}.csv
+      currency: null  # REQUIRED in endogenous mode; e.g. a verified currency_priceyear label
+      inventory_annual_cost_per_t: null  # REQUIRED explicit annual carrying cost
+      # annual_demand / inventory CSV: year,province,value,unit (unit=t).
+      # Demand is annual tonnes; inventory is finite maximum stored tonnes.
+      # Include exactly one row per AC province, including explicit zeros.
+      # capacities CSV: year,province,route,existing_tpy,new_max_tpy,unit
+      # unit=t/year. Each province/route row is unique; omitted routes are unavailable.
+      # resources CSV: year,province,resource,annual_limit,marginal_cost,unit,currency
+      # resource=ore/scrap uses t; coal/gas uses MWh_LHV. annual_limit is per year;
+      # marginal_cost is common currency per resource unit. Supply must be finite.
+      # H2 uses existing provincial H2 buses and upstream electrolysis/storage.
+      # routes YAML has top-level year, currency, routes (list of mappings).
+      # EACH route must explicitly provide every parameter below; no scientific
+      # coefficients are supplied here. source_id/estimate_flag/notes are allowed.
+      # name; electricity_mwh_per_t; hydrogen_mwh_per_t; coal_mwh_per_t;
+      # gas_mwh_per_t; ore_t_per_t; scrap_t_per_t; direct_co2_t_per_t;
+      # new_annual_cost_per_tpy; active_annual_cost_per_tpy; variable_cost_per_t;
+      # minimum_load; ramp_up_per_hour; ramp_down_per_hour; capacity_basis_hours.
+      # Costs are ANNUALIZED per (t/year) of source nominal steel capacity, and
+      # variable cost per t excludes separately priced inputs/carbon. Electricity
+      # is direct process electricity; electrolyzer power is not counted again.
+      # minimum_load describes aggregate annually active capacity, not commitment.
+      # Endogenous mode requires chronological physical hours, cyclic finite
+      # inventory, and solver integration of the annual boundary ramp constraints.

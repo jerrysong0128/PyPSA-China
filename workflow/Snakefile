@@ -14,6 +14,7 @@ from scripts._helpers import (
     get_cutout_params,
     ConfigManager,
 )
+from scripts.industry_adapter import ev_enabled, sectors_enabled, sector_input_paths
 
 # NB: duplicated parameters will be overwritten by the last read cfg
 
@@ -280,13 +281,13 @@ rule build_load_profiles:
     script: "scripts/build_load_profiles.py"
 
 # Only build transport demand if electric vehicles are enabled
-if config.get("sectors", {}).get("electric_vehicles", False):
+if ev_enabled(config):
     if not config["run"].get("is_remind_coupled", False):
         raise ValueError(
             "Electric vehicles require REMIND data for transport demand.\n"
             "Please choose one of the following:\n"
             "1. Set 'run.is_remind_coupled: true' and provide REMIND data files\n"
-            "2. Set 'sectors.electric_vehicles: false' to run electricity-only model"
+            "2. Set 'sectors.electric_vehicles.enabled: false' to disable EV demand"
         )
     rule build_transport_demand:
         params:
@@ -342,7 +343,7 @@ resource_class_cfg = {tech: config["renewable"][tech]["resource_classes"] for te
 rsc_params = {key : "_".join([f"{k}{v}" for k, v in resource_class_cfg[key].items()]) for key in resource_class_cfg}
 if config["foresight"] in ["overnight"]:
     add_brownfield = "-brownfield" if config["existing_capacities"].get("add", False) else ""
-    add_sectors = "-sector" if config.get("sectors", {}).get("electric_vehicles", False) else ""
+    add_sectors = "-sector" if sectors_enabled(config) else ""
 
     rule prepare_networks:
         input:
@@ -365,13 +366,12 @@ if config["foresight"] in ["overnight"]:
         resources: mem_mb=10000
         script: "scripts/prepare_network.py"
 
-    # Only create sector network rule if electric vehicles are enabled
-    if config.get("sectors", {}).get("electric_vehicles", False):
+    # Industry and EV may independently require a sector network.
+    if sectors_enabled(config):
         rule add_sectors:
             input:
                 network=RESULTS_DIR+ '/prenetworks/ntwk_{planning_horizons}.nc',
-                transport_demand_passenger=DERIVED_DATA + "/transport/charging_demand_passenger_{planning_horizons}.csv",
-                transport_demand_freight=DERIVED_DATA + "/transport/charging_demand_freight_{planning_horizons}.csv",
+                **sector_input_paths(config, DERIVED_DATA),
             output:
                 network=RESULTS_DIR+ '/prenetworks-sector/ntwk_{planning_horizons}.nc',
             threads: 1
