@@ -66,6 +66,15 @@ def test_weighted_material_energy_and_carbon():
     assert solve(n)[1] == "infeasible"
 
 
+def test_nonstandard_capacity_rating_preserves_hourly_cost_and_units():
+    n = attach(network(), routes=[route(capacity_basis_hours=8000)])
+    assert solve(n) == ("ok", "optimal")
+    active = "Anhui steel BF-BOF active"
+    assert n.links.at[active, "p_nom_opt"] == pytest.approx(1)
+    # 2 t/h is 16,000 nominal tpy at 8,000 rating hours, with six-hour cost.
+    assert n.objective == pytest.approx(6 + 16000 * 0.1 * 6 / 8760)
+
+
 def test_binding_carbon_cap_changes_route_and_objective():
     routes = [route("dirty", direct_co2_t_per_t=2),
               route("clean", direct_co2_t_per_t=0, variable_cost_per_t=10)]
@@ -147,3 +156,8 @@ def test_fail_closed_on_temporal_and_parameter_errors():
         attach(network(), routes=[route(scrap_t_per_t=1)])
     with pytest.raises(ValueError, match="Missing upstream H2"):
         attach(network(), routes=[route(hydrogen_mwh_per_t=1)])
+    n = network()
+    n.add("Bus", "Anhui steel", carrier="AC")
+    with pytest.raises(ValueError, match="name collision"):
+        attach(n)
+    assert n.loads.empty  # Rejection occurs before any industrial mutation.

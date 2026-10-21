@@ -148,14 +148,34 @@ def add_steel_industry(
         route = route_by_name[route_name]
         if row.existing_tpy + row.new_max_tpy == 0:
             continue
-        if route.hydrogen_mwh_per_t and f"{province} H2" not in n.buses.index:
-            raise ValueError(f"Missing upstream H2 infrastructure for {province}")
+        if route.hydrogen_mwh_per_t:
+            h2_bus = f"{province} H2"
+            if h2_bus not in n.buses.index or n.buses.at[h2_bus, "carrier"] != "H2":
+                raise ValueError(f"Missing upstream H2 infrastructure for {province}")
         for resource in ("coal", "gas", "ore", "scrap"):
             suffix = "mwh" if resource in ("coal", "gas") else "t"
             if getattr(route, f"{resource}_{suffix}_per_t"):
                 if (province, resource) not in supplies.index:
                     raise ValueError(f"Missing bounded {resource} supply for {province}")
                 needs[province, resource] = True
+
+    planned = {"Bus": [], "Load": [], "Store": [], "Generator": [], "Link": []}
+    for province in provinces:
+        planned["Bus"] += [f"{province} steel", f"{province} steel CO2"]
+        planned["Load"].append(f"{province} steel demand")
+        planned["Store"].append(f"{province} steel inventory")
+        planned["Generator"].append(f"{province} steel emissions")
+    for province, resource in needs:
+        planned["Bus"].append(f"{province} steel {resource}")
+        planned["Generator"].append(f"{province} steel {resource}")
+    for (province, route_name), row in caps.iterrows():
+        for vintage, maximum in (("active", row.existing_tpy), ("new", row.new_max_tpy)):
+            if maximum:
+                planned["Link"].append(f"{province} steel {route_name} {vintage}")
+    for component, names in planned.items():
+        collisions = n.static(component).index.intersection(names)
+        if len(collisions) or len(names) != len(set(names)):
+            raise ValueError(f"Industry {component} name collision: {collisions.tolist()}")
 
     _carrier(n, "steel product")
     _carrier(n, "steel direct CO2", emissions=1.0)
@@ -164,7 +184,8 @@ def add_steel_industry(
         n.add("Load", f"{province} steel demand", bus=f"{province} steel",
               carrier="steel product", p_set=float(annual_demand_t[province]) / 8760)
         n.add("Store", f"{province} steel inventory", bus=f"{province} steel",
-              carrier="steel product", e_nom=float(inventory_t[province]), e_cyclic=True,
+              carrier="steel product", e_nom_extendable=True,
+              e_nom_max=float(inventory_t[province]), e_cyclic=True,
               capital_cost=inventory_annual_cost_per_t * fraction)
         n.add("Bus", f"{province} steel CO2", carrier="steel direct CO2", unit="t", location=province)
         # sign=-1 consumes emitted tonnes but positive dispatch contributes to the
