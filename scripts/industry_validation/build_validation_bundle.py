@@ -107,6 +107,7 @@ def build(load_path, assumption_path, output):
     config = {"sectors": {"industry": {"mode": "endogenous",
                "annual_sector_demand": relative(output / "sector_electricity_2030.csv"),
                "carbon_baseline": relative(output / "steel_direct_co2_baseline_2020.csv"),
+               "provenance_manifest": relative(output / "manifest.json"),
                "steel": {key: relative(output / filename) for key, filename in {
                    "annual_demand": "steel_demand_2030.csv", "capacities": "steel_capacities_2030.csv",
                    "resources": "steel_resources_2030.csv", "inventory": "steel_inventory_2030.csv",

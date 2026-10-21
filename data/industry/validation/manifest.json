@@ -114,7 +114,7 @@
   "implementation": [
     {
       "path": "scripts/industry_validation/build_validation_bundle.py",
-      "sha256": "7df58844332956529d23b72e286542137b95e889b67f224944bfe24322ee4512"
+      "sha256": "dd894d74dc4923c8209790e29e7a73bd1c3f36e199746ec767221cc3c79ffcf4"
     },
     {
       "path": "workflow/scripts/industry_data/make_demo_inputs.py",
@@ -122,7 +122,7 @@
     },
     {
       "path": "workflow/scripts/industry_model.py",
-      "sha256": "730dc94f7792ef64c4426e3956229cdae29f7446edaa512fce8d446a7defdb7b"
+      "sha256": "ec3a5f7252460a75897067eaa00d2dba0946a196c3099a6a5337cd835fb98bb7"
     },
     {
       "path": "data/industry/sources/manifest.json",
@@ -131,7 +131,7 @@
   ],
   "portability": "The annual electricity HDF is an external PIK resource, not redistributed here. Supply --load with an equivalent complete 2030 hourly provincial HDF and regenerate this bundle; compare its SHA256 to reproduce this exact fixture.",
   "outputs": {
-    "config.yaml": "4cba9abe70101fa49cd1ed8d1d23eb64b544ec73cd5ce31d2b5a130d9be27b76",
+    "config.yaml": "b00ee832896e4e85fecbcc781591041e55d235279930b1a9a2c6c3f0569e3afc",
     "sector_electricity_2030.csv": "06c8977ea4fbd707644f5f00b51cdbcf4e48beb8367cf81e5f0604795c41e289",
     "steel_capacities_2030.csv": "0fa4614e4c0aa37a16be8e1805a1bcf88ecad03ee39b5fbf4ca72fad42b6407f",
     "steel_demand_2030.csv": "4973319dc61998924371b1402a1212eed0be7235461dfa4c4e71328b913d5578",

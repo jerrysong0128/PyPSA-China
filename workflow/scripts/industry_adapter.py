@@ -2,6 +2,7 @@
 
 from dataclasses import fields
 from hashlib import sha256
+import json
 from pathlib import Path
 
 import numpy as np
@@ -64,6 +65,8 @@ def sector_input_paths(config, derived_data):
         return paths
     options = config["sectors"]["industry"]
     required = {"industry_sector_demand": options.get("annual_sector_demand")}
+    if options.get("provenance_manifest") is not None:
+        required["industry_provenance_manifest"] = options["provenance_manifest"]
     paths["elec_load"] = f"{derived_data}/load/regio_hrly_ac_load_{{planning_horizons}}.h5"
     if mode == "endogenous":
         steel = options.get("steel", {})
@@ -84,6 +87,80 @@ def sector_input_paths(config, derived_data):
             raise ValueError(f"Enabled industry requires an explicit {name} input path")
         paths[name] = path
     return paths
+
+
+def _row_provenance(frame):
+    """Retain source declarations without interpreting non-estimates as observations."""
+    records = []
+    sources = set()
+    for _, row in frame.iterrows():
+        record = {key: (value.item() if isinstance(value, np.generic) else value)
+                  for key in ("year", "province", "route", "sector", "resource", "name")
+                  if key in frame.columns and pd.notna(value := row[key])}
+        source = str(row.get("source_id", "")).strip()
+        source = source if pd.notna(row.get("source_id")) and source else None
+        flag = row.get("estimate_flag")
+        if isinstance(flag, (bool, np.bool_)):
+            flag = bool(flag)
+        elif isinstance(flag, str) and flag.lower() in {"true", "false"}:
+            flag = flag.lower() == "true"
+        else:
+            flag = None
+        record.update(source_id=source, estimate_flag=flag)
+        records.append(record)
+        if source:
+            sources.update(part.strip() for part in source.split(";") if part.strip())
+    return dict(rows=len(records),
+                estimated_rows=sum(row["estimate_flag"] is True for row in records),
+                non_estimated_rows=sum(row["estimate_flag"] is False for row in records),
+                unknown_estimate_rows=sum(row["estimate_flag"] is None for row in records),
+                rows_missing_source_id=sum(row["source_id"] is None for row in records),
+                source_ids=sorted(sources), row_provenance=records)
+
+
+def _input_provenance(paths):
+    """Verify declared bundle bytes and preserve quality labels before mutation.
+
+    Checksums establish which files were used, not the scientific validity of
+    source declarations. Absent source/estimate fields remain explicitly unknown.
+    """
+    hashes = {key: sha256(Path(path).read_bytes()).hexdigest() for key, path in paths.items()}
+    result = dict(version=1, manifest_status="not_provided", data_status="unknown",
+                  manifest=None, assumptions={}, input_coverage={})
+    manifest_path = paths.get("industry_provenance_manifest")
+    if manifest_path:
+        manifest_path = Path(manifest_path)
+        manifest = json.loads(manifest_path.read_text())
+        if (not isinstance(manifest, dict) or not isinstance(manifest.get("outputs"), dict)
+                or not isinstance(manifest.get("status"), str) or not manifest["status"].strip()
+                or not isinstance(manifest.get("assumptions"), dict)):
+            raise ValueError("Industry provenance manifest requires status, assumptions and output checksums")
+        for key, path in paths.items():
+            if key in {"elec_load", "industry_provenance_manifest"}:
+                continue
+            try:
+                name = Path(path).resolve().relative_to(manifest_path.parent.resolve()).as_posix()
+            except ValueError as error:
+                raise ValueError(f"Industry provenance manifest does not cover {key}") from error
+            if manifest["outputs"].get(name) != hashes[key]:
+                raise ValueError(f"Industry provenance checksum mismatch: {key}")
+        source_hashes = {row.get("sha256") for row in manifest.get("sources", [])
+                         if isinstance(row, dict)}
+        if hashes["elec_load"] not in source_hashes:
+            raise ValueError("Industry provenance checksum mismatch: elec_load source")
+        result.update(manifest_status="checksums_verified", data_status=manifest["status"],
+                      manifest=dict(path=str(manifest_path), sha256=hashes["industry_provenance_manifest"]),
+                      assumptions=manifest["assumptions"])
+    for key, path in paths.items():
+        if key in {"elec_load", "industry_provenance_manifest"}:
+            continue
+        if key == "industry_routes":
+            content = yaml.safe_load(Path(path).read_text())
+            frame = pd.DataFrame(content["routes"])
+        else:
+            frame = pd.read_csv(path)
+        result["input_coverage"][key] = _row_provenance(frame)
+    return result, hashes
 
 
 def _read_year_table(path, year, required, mapping):
@@ -232,17 +309,22 @@ def add_configured_industry(n, config, *, planning_year, inputs):
         raise ValueError("industry.province_mapping must be an explicit alias mapping")
     paths = {key: str(path).format(planning_horizons=planning_year) for key, path in dict(inputs).items()
              if key == "elec_load" or key.startswith("industry_")}
+    if options.get("provenance_manifest") is not None and "industry_provenance_manifest" not in paths:
+        raise ValueError("Enabled industry requires its declared industry_provenance_manifest input")
     total, weights = _read_annual_load(paths["elec_load"])
     annual = pd.read_csv(paths["industry_sector_demand"])
     split = split_industry_loads(total, annual, planning_year=planning_year, mode=mode,
                                  snapshot_weightings=weights, province_mapping=mapping)
     model_inputs = _steel_inputs(paths, options, planning_year, total.columns, mapping) if mode == "endogenous" else None
+    provenance, hashes = _input_provenance(paths)
     result = n.copy()
     _replace_electricity_loads(result, split)
     if model_inputs is not None:
         add_steel_industry(result, **model_inputs)
+        result.meta["industry"]["provenance"] = provenance
+    result.meta["industry_loads"]["provenance"] = provenance
     result.meta["industry_loads"]["sources"] = {
-        key: {"path": str(Path(path)), "sha256": sha256(Path(path).read_bytes()).hexdigest()}
+        key: {"path": str(Path(path)), "sha256": hashes[key]}
         for key, path in paths.items()
     }
     return result

@@ -1,6 +1,8 @@
 """Integration contracts for sector configuration, baseline replacement and input files."""
 
 from dataclasses import asdict
+from hashlib import sha256
+import json
 from pathlib import Path
 
 import numpy as np
@@ -226,3 +228,88 @@ def test_repeated_attachment_cannot_subtract_twice(industry_case):
     result = add_configured_industry(n, config, planning_year=2030, inputs=paths)
     with pytest.raises(ValueError, match="already been attached"):
         add_configured_industry(result, config, planning_year=2030, inputs=paths)
+
+
+def provenance_manifest(config, paths):
+    """A synthetic byte manifest, never a claim of empirical calibration."""
+    destination = Path(paths["industry_sector_demand"]).parent / "manifest.json"
+    document = dict(status="synthetic_test_only", assumptions={"demand": "synthetic"},
+        sources=[dict(path=paths["elec_load"], sha256=sha256(Path(paths["elec_load"]).read_bytes()).hexdigest())],
+        outputs={Path(path).name: sha256(Path(path).read_bytes()).hexdigest()
+                 for key, path in paths.items() if key != "elec_load"})
+    destination.write_text(json.dumps(document))
+    config["sectors"]["industry"]["provenance_manifest"] = str(destination)
+    paths["industry_provenance_manifest"] = str(destination)
+    return destination, document
+
+
+def test_manifest_dependency_is_optional_and_off_does_not_read_it(industry_case):
+    n, config, paths, _ = industry_case
+    config["sectors"]["industry"]["provenance_manifest"] = "missing.json"
+    assert sector_input_paths(config, "derived")["industry_provenance_manifest"] == "missing.json"
+    with pytest.raises(ValueError, match="declared industry_provenance_manifest"):
+        add_configured_industry(n, config, planning_year=2030, inputs=paths)
+    config["sectors"]["industry"]["mode"] = "off"
+    assert sector_input_paths(config, "derived") == {}
+    assert add_configured_industry(n, config, planning_year=2030, inputs={}) is n
+
+
+def test_source_flags_and_verified_manifest_survive_network_export(industry_case, tmp_path):
+    n, config, paths, _ = industry_case
+    config["sectors"]["industry"]["mode"] = "endogenous"
+    sectors = pd.read_csv(paths["industry_sector_demand"])
+    sectors["source_id"], sectors["estimate_flag"] = "test_source;test_method", True
+    sectors.to_csv(paths["industry_sector_demand"], index=False)
+    capacity = pd.read_csv(paths["industry_capacities"])
+    capacity["source_id"], capacity["estimate_flag"] = "test_capacity", False
+    capacity.to_csv(paths["industry_capacities"], index=False)
+    manifest, _ = provenance_manifest(config, paths)
+    result = add_configured_industry(n, config, planning_year=2030, inputs=paths)
+    provenance = result.meta["industry"]["provenance"]
+    assert provenance["manifest_status"] == "checksums_verified"
+    assert provenance["data_status"] == "synthetic_test_only"
+    assert provenance["assumptions"] == {"demand": "synthetic"}
+    assert provenance["manifest"]["sha256"] == sha256(manifest.read_bytes()).hexdigest()
+    coverage = provenance["input_coverage"]
+    assert coverage["industry_sector_demand"]["estimated_rows"] == len(sectors)
+    assert coverage["industry_sector_demand"]["source_ids"] == ["test_method", "test_source"]
+    assert coverage["industry_capacities"]["non_estimated_rows"] == 1
+    # Missing declarations stay unknown, including at individual-row level.
+    assert coverage["industry_inventory"]["unknown_estimate_rows"] == 1
+    assert coverage["industry_inventory"]["rows_missing_source_id"] == 1
+    assert coverage["industry_inventory"]["row_provenance"] == [dict(year=2030, province="Hebei", source_id=None, estimate_flag=None)]
+    path = tmp_path / "provenance.nc"
+    result.export_to_netcdf(path)
+    restored = pypsa.Network(path)
+    assert restored.meta["industry"]["provenance"] == provenance
+    assert restored.meta["industry_loads"]["provenance"] == provenance
+    assert "industry_loads" not in n.meta
+
+
+@pytest.mark.parametrize("corruption", ["input", "load", "missing_output"])
+def test_manifest_mismatch_rejected_without_network_mutation(industry_case, corruption):
+    n, config, paths, _ = industry_case
+    destination, document = provenance_manifest(config, paths)
+    if corruption == "input":
+        path = Path(paths["industry_sector_demand"])
+        path.write_text(path.read_text() + "\n")  # same parsed values, different bytes
+    elif corruption == "load":
+        document["sources"][0]["sha256"] = "0" * 64
+        destination.write_text(json.dumps(document))
+    else:
+        del document["outputs"][Path(paths["industry_sector_demand"]).name]
+        destination.write_text(json.dumps(document))
+    before = n.loads.copy(deep=True)
+    with pytest.raises(ValueError, match="provenance checksum mismatch"):
+        add_configured_industry(n, config, planning_year=2030, inputs=paths)
+    pd.testing.assert_frame_equal(n.loads, before)
+    assert not n.meta
+
+
+def test_absent_manifest_cannot_infer_calibrated_data(industry_case):
+    n, config, paths, _ = industry_case
+    result = add_configured_industry(n, config, planning_year=2030, inputs=paths)
+    provenance = result.meta["industry_loads"]["provenance"]
+    assert provenance["manifest_status"] == "not_provided"
+    assert provenance["data_status"] == "unknown"
+    assert provenance["input_coverage"]["industry_sector_demand"]["unknown_estimate_rows"] == 7
