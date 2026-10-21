@@ -278,9 +278,41 @@ def add_industry_constraints(n, snapshots=None):
                                 name=f"industry-cyclic-ramp-down-{i}")
 
 
+def solved_output(n, component, attribute, indices=None):
+    """Read finite solved outputs, restoring only official zero-default columns.
+
+    PyPSA NetCDF export omits columns equal to their component default. An
+    imported finite objective establishes stored solution data, not a new proof
+    of optimality; a live model must additionally have an optimal termination.
+    Existing NaNs and incomplete snapshot indices are never filled.
+    """
+    if not n.is_solved or not np.isfinite(n.objective):
+        raise ValueError("Industrial accounting requires a finite solved objective")
+    model = getattr(n, "_model", None)
+    if model is not None and (model.status != "ok" or model.termination_condition != "optimal"):
+        raise ValueError("Industrial accounting requires an optimal current solve")
+    table = n.static(component)
+    selected = table.index if indices is None else pd.Index(indices)
+    if not selected.isin(table.index).all():
+        raise ValueError(f"Unknown {component} components in solved output request")
+    frame = n.dynamic(component)[attribute]
+    if not frame.index.equals(n.snapshots):
+        raise ValueError(f"Missing chronology in solved {component}-{attribute}")
+    attrs = n.component_attrs[component].loc[attribute]
+    if attrs["status"] != "Output":
+        raise ValueError(f"{component}-{attribute} is not an official Output")
+    missing = selected.difference(frame.columns)
+    if len(missing) and attrs["default"] != 0:
+        raise ValueError(f"Missing non-default solved {component}-{attribute} columns")
+    result = frame.reindex(columns=selected, fill_value=0.0)
+    if not np.isfinite(result).all().all():
+        raise ValueError(f"Non-finite solved {component}-{attribute} output")
+    return result
+
+
 def steel_dispatch(n):
     """Return solved route production (t/h) and direct electricity use (MW)."""
     records = n.meta.get("industry", {}).get("links", [])
     coefficients = pd.Series({r["name"]: r["electricity_mwh_per_t"] for r in records})
-    electricity = n.links_t.p0.reindex(columns=coefficients.index)
+    electricity = solved_output(n, "Link", "p0", coefficients.index)
     return electricity.divide(coefficients, axis=1), electricity
