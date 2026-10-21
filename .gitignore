@@ -36,3 +36,7 @@ __pycache__
 /workflow/logs/*
 .claude
 CLAUDE.md
+
+# Industrial source downloads are retained locally, including original CSVs.
+/data/industry/raw/**
+!/data/industry/raw/.gitkeep
