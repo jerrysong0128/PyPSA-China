@@ -101,6 +101,9 @@ def test_solved_quantities_capacity_costs_and_load_replacement(tmp_path):
     audit = json.loads(Path(paths["audit"]).read_text())
     assert audit["currency"] == "synthetic_EUR2020"
     assert audit["accounting"]["steel_direct_co2_t"] == pytest.approx(2.4)
+    assert audit["provenance"]["data_status"] == "unknown"
+    assert audit["provenance"]["manifest_status"] == "not_provided"
+    assert rows.data_status.eq("unknown").all()
 
 
 def test_zero_capacity_empty_resources_and_missing_audit_are_explicit(tmp_path):
@@ -124,6 +127,22 @@ def test_zero_capacity_empty_resources_and_missing_audit_are_explicit(tmp_path):
 
 def test_exported_solved_netcdf_cli_roundtrip(tmp_path):
     n = solved_network()
+    # Save provenance with the solved network; reports must not infer it from
+    # whichever files happen to be present in the current working directory.
+    provenance = {
+        "version": 1, "manifest_status": "checksums_verified",
+        "data_status": "engineering_validation_only",
+        "manifest": {"path": "fixture/manifest.json", "sha256": "a" * 64},
+        "assumptions": {"demand": "synthetic constant demand"},
+        "input_coverage": {"industry_annual_demand": {
+            "rows": 1, "estimated_rows": 1, "non_estimated_rows": 0,
+            "unknown_estimate_rows": 0, "rows_missing_source_id": 0,
+            "source_ids": ["synthetic-test"],
+            "row_provenance": [{"province": "Anhui", "source_id": "synthetic-test",
+                                "estimate_flag": True}],
+        }},
+    }
+    n.meta["industry"]["provenance"] = provenance
     file = tmp_path / "solved.nc"
     n.export_to_netcdf(file)
     script = Path(__file__).resolve().parents[1] / "workflow/scripts/industry_reporting.py"
@@ -136,6 +155,9 @@ def test_exported_solved_netcdf_cli_roundtrip(tmp_path):
     audit = json.loads(Path(paths["audit"]).read_text())
     assert audit["period_hours"] == 6
     assert audit["tables"]["routes"]["rows"] == 2
+    assert audit["provenance"] == provenance
+    assert rows.data_status.eq("engineering_validation_only").all()
+    assert rows.provenance_manifest_status.eq("checksums_verified").all()
 
 
 def test_failed_physical_validation_does_not_write_reports(tmp_path):

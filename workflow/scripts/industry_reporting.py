@@ -56,11 +56,16 @@ def export_industry_reports(n, output_dir):
     step, hours = chronological_hours(n)
     industry = n.meta["industry"]
     currency = industry["currency"]
+    provenance = industry.get("provenance", {
+        "version": 1, "manifest_status": "not_provided", "data_status": "unknown",
+        "manifest": None, "assumptions": {}, "input_coverage": {},
+    })
     weights = n.snapshot_weightings.generators
     q, power = steel_dispatch(n)
     specs = {r["name"]: r for r in industry["routes"]}
     common = {"period_hours": hours, "annual_result": hours == 8760,
-              "currency": currency}
+              "currency": currency, "data_status": provenance.get("data_status", "unknown"),
+              "provenance_manifest_status": provenance.get("manifest_status", "not_provided")}
     link_cost = get_as_dense(n, "Link", "marginal_cost")
     route_rows = []
     for record in industry["links"]:
@@ -176,7 +181,7 @@ def export_industry_reports(n, output_dir):
         paths[label] = str(output / f"{label}.csv")
         table.to_csv(paths[label], index=False)
     report = dict(common, snapshot_start=str(n.snapshots[0]), snapshot_end=str(n.snapshots[-1]),
-        physical_interval_hours=step, accounting=checks,
+        physical_interval_hours=step, accounting=checks, provenance=provenance,
         conventions={
             "quantities": "period totals; never extrapolated to an annual result",
             "capacity": "nominal t/year at each route's capacity_basis_hours; active and new remain separate",
@@ -186,6 +191,7 @@ def export_industry_reports(n, output_dir):
             "cost_scope": "route capacity plus Link variable costs only; resource supply costs separate; electricity, upstream H2 and emission-price costs not allocated",
             "hydrogen": "direct process H2 MWh LHV, excluding upstream electricity and costs",
             "baseline": "missing baseline audit produces blank baseline quantities, never inferred zeros",
+            "provenance": "taken from this solved network only; manifest checksums verify bytes, not calibration or observation; absent metadata is unknown",
         }, tables={label: {"file": Path(path).name, "rows": len(tables[label])} for label, path in paths.items()})
     paths["audit"] = str(output / "audit.json")
     Path(paths["audit"]).write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
