@@ -1,0 +1,143 @@
+{
+  "status": "engineering_validation_only",
+  "assumptions": {
+    "year": 2030,
+    "currency": "PIK_effective_EUR_unverified_price_year",
+    "status": "engineering_validation_only",
+    "discount_rate": 0.06,
+    "new_capacity_multiple_of_demand": 2.0,
+    "resource_capacity_multiple_of_demand": 2.0,
+    "scrap_fraction_of_crude_demand": 0.3,
+    "inventory_days": 0.0,
+    "inventory_annual_cost_per_t": 20.0,
+    "missing_production_policy": "explicit_zero_scenario",
+    "baseline_route_share": "GEM2026_EAF_share_of_BOF_plus_EAF_capacity",
+    "resource_prices": {
+      "ore": 100.0,
+      "scrap": 300.0,
+      "coal": 10.0,
+      "gas": 30.0
+    },
+    "assumptions": {
+      "money": "All resource prices and route CAPEX are independent test assumptions in the inherited PIK numerical EUR convention; no currency conversion or common price year is claimed.",
+      "temporal": "Hold NBS2020 provincial production constant as 2030 local product demand; no final-demand or trade inference.",
+      "baseline": "Estimate 2020 route output shares from GEM2026 capacity; estimate gross baseline electricity and direct CO2 using the same simplified route coefficients. Neither quantity is an observation.",
+      "sector": "Transfer Henan2024 sector shares to every province; unobserved other-ferrous residual remains in other-industry.",
+      "flexibility": "Minimum load, ramps, capacity additions, resource bounds, scrap fraction and inventory costs are explicitly selected test conditions, not empirical estimates.",
+      "fuels": "Simplified fuel combustion accounting; BF byproduct recovery is not explicit. EAF/DRI minor electrode and fuel inputs are omitted, so their zero direct CO2 is a simplification, not a claim of zero plant emissions."
+    },
+    "routes": [
+      {
+        "name": "BF-BOF",
+        "electricity_mwh_per_t": 0.17294,
+        "hydrogen_mwh_per_t": 0.0,
+        "coal_mwh_per_t": 4.429,
+        "gas_mwh_per_t": 0.0,
+        "ore_t_per_t": 1.539020382,
+        "scrap_t_per_t": 0.051,
+        "direct_co2_t_per_t": 1.5306624,
+        "capex_per_tpy": 600.0,
+        "lifetime_years": 35,
+        "fom_fraction": 0.06,
+        "variable_cost_per_t": 0.0,
+        "minimum_load": 0.7,
+        "ramp_up_per_hour": 0.05,
+        "ramp_down_per_hour": 0.05,
+        "capacity_basis_hours": 8760,
+        "source_id": "neu_2016;bachorz_2026_supplement;bachorz_remind_code;mpp_business_cases;validation_assumptions",
+        "notes": "Gross electricity 0.21343 minus rolling 0.04049 MWh/t from one historical plant, transferred as an estimate; BF coal 4.30*1.03 and CO2=coal*0.0036*96; ore from MPP candidate. Still includes casting; the study functional tonne differs from crude tonnes (1.04266 t crude per functional t), deliberately retained as an approximation. Mixed-source simplified engineering boundary."
+      },
+      {
+        "name": "scrap-EAF",
+        "electricity_mwh_per_t": 0.67,
+        "hydrogen_mwh_per_t": 0.0,
+        "coal_mwh_per_t": 0.0,
+        "gas_mwh_per_t": 0.0,
+        "ore_t_per_t": 0.0,
+        "scrap_t_per_t": 1.09,
+        "direct_co2_t_per_t": 0.0,
+        "capex_per_tpy": 350.0,
+        "lifetime_years": 20,
+        "fom_fraction": 0.06,
+        "variable_cost_per_t": 0.0,
+        "minimum_load": 0.0,
+        "ramp_up_per_hour": 1.0,
+        "ramp_down_per_hour": 1.0,
+        "capacity_basis_hours": 8760,
+        "source_id": "bachorz_2026_supplement;bachorz_remind_code;validation_assumptions",
+        "notes": "REMIND simplified EAF electricity and scrap coefficients; casting/rolling excluded; minor direct fossil/electrode emissions omitted for validation only."
+      },
+      {
+        "name": "H2-DRI-EAF",
+        "electricity_mwh_per_t": 0.7552,
+        "hydrogen_mwh_per_t": 2.37495,
+        "coal_mwh_per_t": 0.0,
+        "gas_mwh_per_t": 0.0,
+        "ore_t_per_t": 1.5336,
+        "scrap_t_per_t": 0.0,
+        "direct_co2_t_per_t": 0.0,
+        "capex_per_tpy": 770.0,
+        "lifetime_years": 20,
+        "fom_fraction": 0.06,
+        "variable_cost_per_t": 0.0,
+        "minimum_load": 0.2,
+        "ramp_up_per_hour": 0.2,
+        "ramp_down_per_hour": 0.2,
+        "capacity_basis_hours": 8760,
+        "source_id": "bachorz_2026_supplement;bachorz_remind_code;validation_assumptions",
+        "notes": "EAF plus 1.065 tDRI/tsteel; direct power=.67+.08*1.065, H2 LHV=2.23*1.065, pellet=1.44*1.065. Generic ore supply is treated as pellet equivalent; pelletization costs/energy not explicitly modeled."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "path": "/Users/jerrysong/Study_PKU/PyPSA_Workspace/PyPSA-China-PIK/resources/derived_data/overnight_co2pw-exp175default_topo-current+FCG/load/regio_hrly_ac_load_2030.h5",
+      "sha256": "1c74c9b58407a0afa52b0f6c3d7cbb9b521b40ff9471410f22326ee8cdf1c0e2"
+    },
+    {
+      "path": "config/industry.validation_assumptions.yaml",
+      "sha256": "260c2d0dec437844df4ae8213f91ae6ceb75da55b1721b2cf069bed11db793d2"
+    },
+    {
+      "path": "data/industry/processed/nbs_province_steel_production_2020.csv",
+      "sha256": "d2ccd2be0517033dcbcc46b74771e7b6a78acc15871cf29ebdfaa462bc58b203"
+    },
+    {
+      "path": "data/industry/processed/gem_province_capacity_2026.csv",
+      "sha256": "18250af509394b8c5bb4f8e1f4029384c31f657629e6df5df288b5c3b85cadfd"
+    },
+    {
+      "path": "data/industry/processed/henan_sector_electricity_2024.csv",
+      "sha256": "e91e7a66b2d012d9f699fbeb5f1240e1b0f1ea58b16654dd695521826c90b372"
+    }
+  ],
+  "implementation": [
+    {
+      "path": "scripts/industry_validation/build_validation_bundle.py",
+      "sha256": "7df58844332956529d23b72e286542137b95e889b67f224944bfe24322ee4512"
+    },
+    {
+      "path": "workflow/scripts/industry_data/make_demo_inputs.py",
+      "sha256": "1c6373b277a1a302084220f8a89fb0e9a1744edc12eb02903bbe0c230da9e99f"
+    },
+    {
+      "path": "workflow/scripts/industry_model.py",
+      "sha256": "730dc94f7792ef64c4426e3956229cdae29f7446edaa512fce8d446a7defdb7b"
+    },
+    {
+      "path": "data/industry/sources/manifest.json",
+      "sha256": "8ccc040b011e7d80c4636b035250c02ffa40fcb2bc8033ac3ff461b875c63ca8"
+    }
+  ],
+  "portability": "The annual electricity HDF is an external PIK resource, not redistributed here. Supply --load with an equivalent complete 2030 hourly provincial HDF and regenerate this bundle; compare its SHA256 to reproduce this exact fixture.",
+  "outputs": {
+    "config.yaml": "4cba9abe70101fa49cd1ed8d1d23eb64b544ec73cd5ce31d2b5a130d9be27b76",
+    "sector_electricity_2030.csv": "06c8977ea4fbd707644f5f00b51cdbcf4e48beb8367cf81e5f0604795c41e289",
+    "steel_capacities_2030.csv": "0fa4614e4c0aa37a16be8e1805a1bcf88ecad03ee39b5fbf4ca72fad42b6407f",
+    "steel_demand_2030.csv": "4973319dc61998924371b1402a1212eed0be7235461dfa4c4e71328b913d5578",
+    "steel_direct_co2_baseline_2020.csv": "1db5b29e356158c036e99f5f80f0424d965da33aa9f6c248d6c68238104cc3b7",
+    "steel_inventory_2030.csv": "bc00b45d1003eff35916d1f4003250dec7be1bc3947a268647a9785b6bce60c7",
+    "steel_resources_2030.csv": "58b50dcca98cc8f264f6a087fb8bfb20f72a66686a02ad935633a8e71125d3b2",
+    "steel_routes_2030.yaml": "6b7eedfd590a502eec1187c53e0598a4e777ebf8e0adca37d5dcb978ae9aa8bb"
+  }
+}

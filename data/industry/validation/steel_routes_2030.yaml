@@ -1,0 +1,64 @@
+year: 2030
+currency: PIK_effective_EUR_unverified_price_year
+routes:
+- name: BF-BOF
+  electricity_mwh_per_t: 0.17294
+  hydrogen_mwh_per_t: 0.0
+  coal_mwh_per_t: 4.429
+  gas_mwh_per_t: 0.0
+  ore_t_per_t: 1.539020382
+  scrap_t_per_t: 0.051
+  direct_co2_t_per_t: 1.5306624
+  variable_cost_per_t: 0.0
+  minimum_load: 0.7
+  ramp_up_per_hour: 0.05
+  ramp_down_per_hour: 0.05
+  capacity_basis_hours: 8760
+  new_annual_cost_per_tpy: 77.38431538779794
+  active_annual_cost_per_tpy: 36.0
+  source_id: neu_2016;bachorz_2026_supplement;bachorz_remind_code;mpp_business_cases;validation_assumptions
+  estimate_flag: true
+  notes: Gross electricity 0.21343 minus rolling 0.04049 MWh/t from one historical
+    plant, transferred as an estimate; BF coal 4.30*1.03 and CO2=coal*0.0036*96; ore
+    from MPP candidate. Still includes casting; the study functional tonne differs
+    from crude tonnes (1.04266 t crude per functional t), deliberately retained as
+    an approximation. Mixed-source simplified engineering boundary.
+- name: scrap-EAF
+  electricity_mwh_per_t: 0.67
+  hydrogen_mwh_per_t: 0.0
+  coal_mwh_per_t: 0.0
+  gas_mwh_per_t: 0.0
+  ore_t_per_t: 0.0
+  scrap_t_per_t: 1.09
+  direct_co2_t_per_t: 0.0
+  variable_cost_per_t: 0.0
+  minimum_load: 0.0
+  ramp_up_per_hour: 1.0
+  ramp_down_per_hour: 1.0
+  capacity_basis_hours: 8760
+  new_annual_cost_per_tpy: 51.51459494189799
+  active_annual_cost_per_tpy: 21.0
+  source_id: bachorz_2026_supplement;bachorz_remind_code;validation_assumptions
+  estimate_flag: true
+  notes: REMIND simplified EAF electricity and scrap coefficients; casting/rolling
+    excluded; minor direct fossil/electrode emissions omitted for validation only.
+- name: H2-DRI-EAF
+  electricity_mwh_per_t: 0.7552
+  hydrogen_mwh_per_t: 2.37495
+  coal_mwh_per_t: 0.0
+  gas_mwh_per_t: 0.0
+  ore_t_per_t: 1.5336
+  scrap_t_per_t: 0.0
+  direct_co2_t_per_t: 0.0
+  variable_cost_per_t: 0.0
+  minimum_load: 0.2
+  ramp_up_per_hour: 0.2
+  ramp_down_per_hour: 0.2
+  capacity_basis_hours: 8760
+  new_annual_cost_per_tpy: 113.33210887217558
+  active_annual_cost_per_tpy: 46.199999999999996
+  source_id: bachorz_2026_supplement;bachorz_remind_code;validation_assumptions
+  estimate_flag: true
+  notes: EAF plus 1.065 tDRI/tsteel; direct power=.67+.08*1.065, H2 LHV=2.23*1.065,
+    pellet=1.44*1.065. Generic ore supply is treated as pellet equivalent; pelletization
+    costs/energy not explicitly modeled.

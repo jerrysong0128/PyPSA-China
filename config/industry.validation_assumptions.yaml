@@ -1,0 +1,80 @@
+# Engineering validation only. These values are NOT a calibrated steel scenario.
+# Do not use route shares, costs, emissions or dispatch as scientific findings.
+year: 2030
+currency: PIK_effective_EUR_unverified_price_year
+status: engineering_validation_only
+discount_rate: 0.06
+new_capacity_multiple_of_demand: 2.0
+resource_capacity_multiple_of_demand: 2.0
+scrap_fraction_of_crude_demand: 0.30
+inventory_days: 0.0
+inventory_annual_cost_per_t: 20.0
+missing_production_policy: explicit_zero_scenario
+baseline_route_share: GEM2026_EAF_share_of_BOF_plus_EAF_capacity
+resource_prices:
+  ore: 100.0
+  scrap: 300.0
+  coal: 10.0
+  gas: 30.0
+assumptions:
+  money: All resource prices and route CAPEX are independent test assumptions in the inherited PIK numerical EUR convention; no currency conversion or common price year is claimed.
+  temporal: Hold NBS2020 provincial production constant as 2030 local product demand; no final-demand or trade inference.
+  baseline: Estimate 2020 route output shares from GEM2026 capacity; estimate gross baseline electricity and direct CO2 using the same simplified route coefficients. Neither quantity is an observation.
+  sector: Transfer Henan2024 sector shares to every province; unobserved other-ferrous residual remains in other-industry.
+  flexibility: Minimum load, ramps, capacity additions, resource bounds, scrap fraction and inventory costs are explicitly selected test conditions, not empirical estimates.
+  fuels: Simplified fuel combustion accounting; BF byproduct recovery is not explicit. EAF/DRI minor electrode and fuel inputs are omitted, so their zero direct CO2 is a simplification, not a claim of zero plant emissions.
+routes:
+  - name: BF-BOF
+    electricity_mwh_per_t: 0.17294
+    hydrogen_mwh_per_t: 0.0
+    coal_mwh_per_t: 4.429
+    gas_mwh_per_t: 0.0
+    ore_t_per_t: 1.539020382
+    scrap_t_per_t: 0.051
+    direct_co2_t_per_t: 1.5306624
+    capex_per_tpy: 600.0
+    lifetime_years: 35
+    fom_fraction: 0.06
+    variable_cost_per_t: 0.0
+    minimum_load: 0.7
+    ramp_up_per_hour: 0.05
+    ramp_down_per_hour: 0.05
+    capacity_basis_hours: 8760
+    source_id: neu_2016;bachorz_2026_supplement;bachorz_remind_code;mpp_business_cases;validation_assumptions
+    notes: Gross electricity 0.21343 minus rolling 0.04049 MWh/t from one historical plant, transferred as an estimate; BF coal 4.30*1.03 and CO2=coal*0.0036*96; ore from MPP candidate. Still includes casting; the study functional tonne differs from crude tonnes (1.04266 t crude per functional t), deliberately retained as an approximation. Mixed-source simplified engineering boundary.
+  - name: scrap-EAF
+    electricity_mwh_per_t: 0.67
+    hydrogen_mwh_per_t: 0.0
+    coal_mwh_per_t: 0.0
+    gas_mwh_per_t: 0.0
+    ore_t_per_t: 0.0
+    scrap_t_per_t: 1.09
+    direct_co2_t_per_t: 0.0
+    capex_per_tpy: 350.0
+    lifetime_years: 20
+    fom_fraction: 0.06
+    variable_cost_per_t: 0.0
+    minimum_load: 0.0
+    ramp_up_per_hour: 1.0
+    ramp_down_per_hour: 1.0
+    capacity_basis_hours: 8760
+    source_id: bachorz_2026_supplement;bachorz_remind_code;validation_assumptions
+    notes: REMIND simplified EAF electricity and scrap coefficients; casting/rolling excluded; minor direct fossil/electrode emissions omitted for validation only.
+  - name: H2-DRI-EAF
+    electricity_mwh_per_t: 0.7552
+    hydrogen_mwh_per_t: 2.37495
+    coal_mwh_per_t: 0.0
+    gas_mwh_per_t: 0.0
+    ore_t_per_t: 1.5336
+    scrap_t_per_t: 0.0
+    direct_co2_t_per_t: 0.0
+    capex_per_tpy: 770.0
+    lifetime_years: 20
+    fom_fraction: 0.06
+    variable_cost_per_t: 0.0
+    minimum_load: 0.2
+    ramp_up_per_hour: 0.2
+    ramp_down_per_hour: 0.2
+    capacity_basis_hours: 8760
+    source_id: bachorz_2026_supplement;bachorz_remind_code;validation_assumptions
+    notes: EAF plus 1.065 tDRI/tsteel; direct power=.67+.08*1.065, H2 LHV=2.23*1.065, pellet=1.44*1.065. Generic ore supply is treated as pellet equivalent; pelletization costs/energy not explicitly modeled.
