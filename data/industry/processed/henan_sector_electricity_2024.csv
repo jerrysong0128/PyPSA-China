@@ -1,0 +1,9 @@
+province,province_code,year,sector,value,unit,raw_value,raw_unit,source_id,source_locator,estimate_flag,boundary_note
+Henan,HA,2024,total,431994000.00,MWh/year,4319.94,亿千瓦时,nea_henan_2024,annual cumulative:全社会用电总计,False,published electricity consumption
+Henan,HA,2024,primary,8714000.00,MWh/year,87.14,亿千瓦时,nea_henan_2024,annual cumulative:第一产业,False,published electricity consumption
+Henan,HA,2024,secondary,233071000.00,MWh/year,2330.71,亿千瓦时,nea_henan_2024,annual cumulative:第二产业,False,published electricity consumption
+Henan,HA,2024,tertiary,92509000.00,MWh/year,925.09,亿千瓦时,nea_henan_2024,annual cumulative:第三产业,False,published electricity consumption
+Henan,HA,2024,residential,97700000,MWh/year,977,亿千瓦时,nea_henan_2024,annual cumulative:城乡居民生活用电合计,False,published electricity consumption
+Henan,HA,2024,industry,228325000.00,MWh/year,2283.25,亿千瓦时,nea_henan_2024,annual cumulative:工业,False,published electricity consumption
+Henan,HA,2024,manufacturing,158939000.00,MWh/year,1589.39,亿千瓦时,nea_henan_2024,annual cumulative:制造业,False,published electricity consumption
+Henan,HA,2024,ferrous_smelting_rolling,13043000.00,MWh/year,130.43,亿千瓦时,nea_henan_2024,annual cumulative:黑色金属冶炼和压延加工业,False,ferrous includes rolling and ferroalloys; not identical to crude steel

@@ -1,0 +1,6 @@
+province,province_code,year,sector,value,unit,source_id,source_locator,estimate_flag,boundary_note
+China,CN,2020,total,7511000000,MWh/year,nea_national_2020,annual electricity paragraph,False,secondary includes construction; national share is not measured provincial share
+China,CN,2020,primary,85900000,MWh/year,nea_national_2020,annual electricity paragraph,False,secondary includes construction; national share is not measured provincial share
+China,CN,2020,secondary,5121500000,MWh/year,nea_national_2020,annual electricity paragraph,False,secondary includes construction; national share is not measured provincial share
+China,CN,2020,tertiary,1208700000,MWh/year,nea_national_2020,annual electricity paragraph,False,secondary includes construction; national share is not measured provincial share
+China,CN,2020,residential,1094900000,MWh/year,nea_national_2020,annual electricity paragraph,False,secondary includes construction; national share is not measured provincial share
