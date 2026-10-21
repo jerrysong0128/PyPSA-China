@@ -119,20 +119,20 @@ the following run records establish the integration scale actually verified.
 
 | Capability | Implementation and verified evidence | Remaining acceptance or research work |
 |---|---|---|
-| Input provenance | Original downloads are retained under ignored `data/industry/raw/`; processing code and processed/validation tables retain source, unit, year and checksum records. `tests/test_industry_data.py` checks unit conversion, unknown values, and separation of capacity from production. The solved PIK audit checks its input checksums. | Replace explicitly labelled engineering assumptions with sufficient provincial/plant observations. Download retention does not resolve data coverage or redistribution rights. |
+| Input provenance | Original downloads are retained under ignored `data/industry/raw/`; processing code and processed/validation tables retain source, unit, year and checksum records. The adapter optionally verifies enabled input checksums before mutation, preserves row source/estimate declarations in NetCDF, and reports unknown declarations explicitly. Data, adapter and report tests verify these boundaries. | Replace explicitly labelled engineering assumptions with sufficient provincial/plant observations. Checksums verify bytes, not empirical calibration or redistribution rights. |
 | Sector decomposition | `industry_loads.py` and `industry_adapter.py` implement `off`, `fixed_load` and `endogenous` modes. Tests check nonnegative reconstruction, steel within industry, full-year denominators, required provinces and repeat-subtraction rejection. The 31-province 72-hour run reconstructs original electricity with maximum error about `1.46e-11 MW`. | Empirical sector profiles and steel electricity baselines need calibration. Constant annual shares of the provincial hourly shape are an explicit approximation. |
-| Endogenous steel electricity | The adapter removes the specified baseline once; `industry_accounting.py` reports original, removed, residual and endogenous electricity separately. Analytic replacement tests and the 72-hour solved audit close the accounting. | Validate a complete national annual replacement table after the annual solve. Endogenous consumption is allowed to differ from the historical baseline. |
+| Endogenous steel electricity | The adapter removes the specified baseline once; `industry_accounting.py` and the industrial report export original, removed, residual and endogenous electricity separately. Analytic replacement tests, the six-hour workflow and the 72-hour solved audit close the accounting. | Endogenous consumption is allowed to differ from the historical baseline. A future annual scientific result would require a new full-year replacement audit; it is not required for present usability. |
 | Routes and material balances | `industry_model.py` supplies multiport continuous route Links, fixed provincial product demand and distinct active/new capacity. BF–BOF, scrap-EAF and H2–DRI–EAF are present in the integration fixture. Analytic tests verify material, electricity, fuel and upstream H2 electricity balances. | The 72-hour solve does not prove that every route dispatches. Route coefficients, product boundaries, yields and real plant eligibility require research calibration. |
 | Feedstock limits | Finite resource availability, resource prices and input ports are implemented; tests cover binding scrap limits and H2 coupling. Annual resource limits are prorated for a short physical horizon. | Calibrate scrap/ore/fuel supply and costs. A valid finite engineering bound is not evidence of an observed provincial resource budget. |
-| Capacity and economics | Installed/new capacity, availability, capacity-basis hours and annual cost conversion are implemented and tested. The seasonal benchmark reconciles capacity, dispatch and inventory costs with the objective. | **Currency/base-year acceptance remains open.** The validation bundle uses `PIK_effective_EUR_unverified_price_year`; existing PIK cost-source conversion/base-year issues remain documented in `scripts/industry_validation/README.md`. Empirical investment/retirement conclusions also need calibrated costs, lifetimes and bounds. |
+| Capacity and economics | Active/new capacity, capacity-basis hours and annual cost conversion are implemented and tested. The seasonal benchmark reconciles capacity, dispatch and inventory costs with the objective. Capacity-basis hours convert units; an independent time-varying process-availability input is not implemented. | **Currency/base-year calibration remains open.** The validation bundle uses `PIK_effective_EUR_unverified_price_year`; existing PIK cost-source conversion/base-year issues remain documented in `scripts/industry_validation/README.md`. Empirical investment/retirement conclusions need calibrated costs, lifetimes, bounds and applicable downtime assumptions. |
 | Continuous flexibility and stocks | Minimum operating levels, hourly ramps including the cyclic boundary, and finite costed inventory are implemented. Analytic tests show inventory cost changes the decision. The 8760-hour seasonal comparison verifies dispatch shifts with bounded inventory and zero initial/final stock. | Nonzero stock size and steel operating limits need independent evidence or labelled sensitivities. The synthetic 30-day case does not change the zero-inventory default. |
 | Provincial boundary | Product demand is served locally with no steel/DRI transfer Links in the baseline. Provincial material balances are checked in analytic tests and solved-network accounting. | No trade or relocation claim is supported or required for this accepted baseline. A future trade extension would need separate accounting and evidence. |
 | Emissions | Direct steel emissions enter the joint carbon constraint; upstream electricity remains counted at generation. Analytic tests include a binding cap and route switching. The 72-hour audit reconciles direct steel plus other primary-energy CO2. | The national 72-hour cap is slack, so its result alone is not a carbon-response test. Calibrate process/fuel emission boundaries and validate full-year totals before research interpretation. |
-| Chronology and units | Tests cover weighted/coarser snapshots, short-horizon scaling, capacity-basis hours, leap-calendar alignment and rejection of unsupported inputs. The seasonal run uses 8760 consecutive hours with all weights one. National annual networks have been prepared from full-year inputs. | A 72-hour solve is not annual planning. Full 31-province annual optimization and post-solve accounting remain pending; do not turn repeated short windows into a seasonal test. |
+| Chronology and units | Tests cover weighted/coarser snapshots, short-horizon scaling, capacity-basis hours, leap-calendar alignment and rejection of unsupported inputs. The retained seasonal run uses 8760 consecutive hours with all weights one. National annual networks have been prepared from full-year inputs. | Short cases validate interfaces and balances. National annual planning has not been validated and is outside the current requested check; repeated short windows must not be described as a seasonal test. |
 | Disabled-mode compatibility | Adapter/load/report tests cover `off`, unchanged unrelated loads and EV option semantics. A full-year disabled-industry PIK network has been prepared. | A full solved baseline regression and all downstream workflow products have not been certified by these checks. |
-| PIK integration and persistence | Preparation/solve hooks are connected to the PIK workflow. The 31-province 72-hour HiGHS run is optimal; its solved NetCDF is re-imported by `audit_pik_solution.py`, with carrier balances, carbon accounting and source hashes checked. | Full 31-province 8760-hour solve and complete ordinary workflow/report execution remain outstanding. A prepared annual NetCDF is not a solved annual result. |
-| Reporting | `industry_accounting.py` provides route/activity and replacement audits. `plot_statistics.py` and `make_summary.py` exclude tonne-based product Loads from electrical MW totals and include conversion electricity. Reporting tests cover upstream H2, off mode and battery charging. | Full provincial industrial exports covering route output, capacity/investment, fuel/H2, emissions, utilization, inventory, costs and coverage are still being completed. Existing general statistics and energy-balance CSVs do not certify that full report contract. |
-| Portable commits | Data processing, load decomposition, process core, adapter, accounting and report compatibility are separated in the development history. `docs/industry/commit_dependencies.md` records the intended dependency order. | Finalize the dependency ledger against the current rewritten history and verify cherry-picks onto the intended formal-work base. Paths here avoid stale implementation hashes. |
+| PIK integration and persistence | Preparation/solve hooks are connected to PIK. The six-hour LP is exported, reimported and processed through the actual Snakemake report rule. Full production rule listings and `plot_all` dry-runs pass in all three modes. The existing 31-province 72-hour optimal network also passes saved-network audits and actual industrial CSV export. | A national annual solution and execution of every inherited plotting product are not certified. Neither is needed for the agreed minimal usability check. |
+| Reporting | `industry_reporting.py` exports route output, active/new capacity, fuel/H2/material inputs, emissions, utilisation, inventory, process/resource costs and electricity replacement. Audit JSON retains embedded provenance; CSVs label data/manifest status. General electrical reports exclude product tonnes and include process/electrolysis/battery charging. | Reported route costs exclude allocated upstream electricity, H2 and emissions-price costs; they are not a full system-objective decomposition. Older solved networks without embedded input quality remain explicitly unknown. |
+| Portable commits | Data, load decomposition, process core, adapter, accounting, reporting and validation have separate functional commits, all with the Codex co-author trailer. `docs/industry/commit_dependencies.md` records concrete prerequisites and selectable chains. | Recheck patch conflicts and tests against the user's eventual formal-work revision; the verified base is the PIK commit named in that ledger. |
 
 Electrical reporting uses **gross AC withdrawal**: fixed AC Loads plus positive
 AC consumption by conversion Links, including industrial production, electrolysis
@@ -142,15 +142,15 @@ See [electricity reporting definitions](electricity_reporting.md).
 
 ### Test verification boundary
 
-The analytic coverage referenced above is in `tests/test_industry_model.py`,
-`tests/test_industry_accounting.py`, `tests/test_industry_loads.py`,
-`tests/test_industry_adapter.py`, `tests/test_industry_data.py` and
-`tests/test_industry_reporting.py`. Earlier successful checks and the persisted
-solve/audit records establish the evidence described here. An independent
-combined rerun on 2026-10-21 was **incomplete** because filesystem writes failed
-with `ENOSPC` (`No space left on device`; approximately 119 MiB available).
-It is not a fresh whole-suite pass and does not supersede those earlier records.
-No additional repeat was attempted after identifying the storage limitation.
+On 2026-10-21 a fresh combined run of all eight industrial test modules completed:
+**101 passed in 23.83 seconds**. This includes loads, process modelling,
+accounting, adapter/provenance, source processing, general reports, industrial
+exports and the actual Snakemake report rule. The independently invoked six-hour
+quick-start case also passed in 5.81 seconds and its CSVs were read back. One
+NumPy binary-interface warning and PyPSA statistics deprecation warnings were
+reported; neither caused a test failure. An earlier rerun had stopped on
+`ENOSPC`; that storage limitation was resolved before these successful checks.
+See [the quick start](quickstart.md) for both commands.
 
 ### Verified runs and their limits
 
@@ -191,14 +191,16 @@ preparation and calendar checks. The endogenous annual directory contains
 `prepared_2030.nc` and configuration/resource audits, but no verified solved
 annual network at this review. Annual preparation uses the original full-year
 inputs and annual cost scaling; it is not obtained by extending the solved
-72-hour network. The next national acceptance gate is an optimal 31-province
-8760-hour solution followed by physical, financial and reporting audits.
+72-hour network. A future national annual study would require an optimal
+31-province 8760-hour solution followed by physical, financial and reporting
+audits. On 2026-10-21 the user explicitly selected minimal-case
+usability testing for the present handover; a national annual solve is not a
+current acceptance requirement. The retry was stopped at the user's request.
 
-The current continuous LP therefore has implemented and partially integrated
-industrial infrastructure spanning the reference's production, capacity,
-inventory, electricity and emissions concerns. Its technical validation is now
-beyond a small LP alone. Full national annual validation, complete reporting and
-empirical calibration remain separate unfinished gates. Neither the synthetic
+The accepted continuous LP infrastructure now connects production, capacity,
+inventory, electricity, emissions, persistence and industrial reporting, with
+the agreed minimal usability check complete. Full national annual validation
+and empirical calibration are future research work. Neither the synthetic
 seasonal comparison nor the national short-horizon run reproduces the paper's
 aluminium results or establishes steel seasonal benefits in China.
 

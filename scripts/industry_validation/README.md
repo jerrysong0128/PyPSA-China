@@ -6,6 +6,10 @@ execution builds/prepares a network; add `--solve` to optimize. It does not inve
 steel coefficients. The bundle in `data/industry/validation` is an explicitly
 estimated engineering fixture, not a calibrated scientific scenario.
 
+For the current handover, use the [six-hour minimal test](../../docs/industry/quickstart.md).
+The user selected that usability scope on 2026-10-21; the national examples below
+are optional integration/research tools, not commands that must be run now.
+
 ## Existing 31-province, 72-hour network
 
 ```sh

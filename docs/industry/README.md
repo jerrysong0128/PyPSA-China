@@ -38,6 +38,15 @@ Processing code must reproduce these tables. Missing observations are not zero.
 Every estimate needs its method, input sources, geography and year. Synthetic
 test fixtures must never be described as observed provincial data.
 
+## Commit contract
+
+Group changes by cohesive functionality, with the corresponding tests and
+documentation in the same commit. Keep data preparation, model components,
+workflow integration and validation scenarios independently reviewable. Record
+required predecessor commits in `commit_dependencies.md` for cherry-picking.
+Every commit on this development branch includes the trailer
+`Co-authored-by: Codex <noreply@openai.com>` while retaining the human author.
+
 ## Acceptance gates
 
 1. Reproducible sources, coverage/units/year validation, and explicit estimates.
@@ -48,8 +57,10 @@ test fixtures must never be described as observed provincial data.
 6. Workflow combinations with industry off/fixed/endogenous and EV off/on.
 7. Electrical reserves and reporting exclude material units and include process
    electricity; solved networks retain physically consistent industrial flows.
-8. Small analytic LPs, 31-province chronological smoke case, then a full-year
-   hourly 2030 run with reproducible configuration and validation reports.
+8. Small analytic LPs and a minimal solve/export/reimport/report workflow with
+   reproducible inputs and checks. Per the user's 2026-10-21 instruction, a
+   national full-year solve is not required for this infrastructure handover.
+   The existing 31-province 72-hour run is additional integration evidence.
 9. A reference capability comparison explicitly distinguishes implemented,
    validated, pending, and unavailable upstream features. Solver success alone
    does not satisfy these gates.
@@ -57,3 +68,7 @@ test fixtures must never be described as observed provincial data.
 Progress and actual cherry-pick dependencies are recorded in
 `commit_dependencies.md`. No scientific conclusion about future steel technology
 shares follows from demonstration scenarios.
+
+See [the minimal-case quick start](quickstart.md) for the test command and output
+files. Full-year construction and the optional seasonal benchmark remain
+available for later work; neither is required to check current usability.
