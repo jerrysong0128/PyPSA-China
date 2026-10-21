@@ -127,6 +127,29 @@ def validate_industry_solution(n, tolerance=1e-5):
         used = float((n.generators_t.p[name] * n.snapshot_weightings.generators).sum())
         limit = n.generators.at[name, "e_sum_max"]
         residuals[f"{name}:resource_fraction"] = max(0, used - limit) / max(1, limit)
+    load_audit = n.meta.get("industry_loads", {})
+    electricity_audit = {}
+    if load_audit:
+        if load_audit["mode"] != "endogenous":
+            raise ValueError("Endogenous steel requires the corresponding load-replacement audit")
+        baseline = pd.DataFrame(load_audit["steel_baseline_mw"],
+                                index=pd.DatetimeIndex(load_audit["baseline_snapshots"]))
+        if not baseline.index.equals(n.snapshots):
+            raise ValueError("Steel baseline audit snapshots differ from solved chronology")
+        names = load_audit["fixed_load_names"]
+        if not pd.Index(names).isin(n.loads.index).all():
+            raise ValueError("Audited sector loads are missing from solved network")
+        fixed = get_as_dense(n, "Load", "p_set")[names].T.groupby(n.loads.loc[names, "bus"]).sum().T
+        weights = n.snapshot_weightings.generators
+        original = pd.Series(load_audit["original_period_mwh"])
+        rebuilt = fixed.add(baseline, fill_value=0).mul(weights, axis=0).sum()
+        residuals["baseline_replacement_fraction"] = float(((rebuilt - original).abs() / original.clip(lower=1)).max())
+        removed = float(baseline.mul(weights, axis=0).sum().sum())
+        process = float(electricity.mul(weights, axis=0).sum().sum())
+        electricity_audit = {"removed_baseline_mwh": removed, "endogenous_process_mwh": process,
+                             "process_minus_baseline_mwh": process - removed,
+                             "gross_ac_withdrawal_mwh": float(electricity_consumption_by_province(n).mul(weights, axis=0).sum().sum()),
+                             "note": "Process electricity excludes upstream hydrogen; gross AC withdrawal includes conversion and storage charging."}
     total_co2, by_generator = primary_energy_emissions(n)
     for name, cap in n.global_constraints.iterrows():
         if cap.type == "primary_energy" and cap.carrier_attribute == "co2_emissions" and cap.sense == "<=":
@@ -138,4 +161,4 @@ def validate_industry_solution(n, tolerance=1e-5):
     return {"period_hours": hours, "annual_result": hours == 8760,
             "total_co2_t": total_co2, "steel_direct_co2_t": float(direct),
             "other_primary_energy_co2_t": total_co2 - float(direct),
-            "routes": metrics, "residuals": residuals}
+            "routes": metrics, "electricity_replacement": electricity_audit, "residuals": residuals}

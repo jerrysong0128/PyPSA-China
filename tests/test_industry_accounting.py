@@ -54,6 +54,23 @@ def test_inventory_cost_affects_capacity_decision():
     validate_industry_solution(n)
 
 
+def test_solved_report_reconciles_replaced_baseline():
+    n = attach(network())
+    n.add("Load", "fixed sector", bus="Anhui", p_set=3)
+    n.meta["industry_loads"] = {"mode": "endogenous", "fixed_load_names": ["fixed sector"],
+                                "baseline_snapshots": [t.isoformat() for t in n.snapshots],
+                                "steel_baseline_mw": {"Anhui": [1, 1]},
+                                "original_period_mwh": {"Anhui": 24}}
+    assert solve(n) == ("ok", "optimal")
+    report = validate_industry_solution(n)
+    assert report["electricity_replacement"]["removed_baseline_mwh"] == 6
+    assert report["electricity_replacement"]["endogenous_process_mwh"] == pytest.approx(6)
+    assert report["electricity_replacement"]["gross_ac_withdrawal_mwh"] == pytest.approx(24)
+    n.loads.at["fixed sector", "p_set"] = 4
+    with pytest.raises(ValueError, match="baseline_replacement_fraction"):
+        validate_industry_solution(n)
+
+
 def test_reserve_uses_mw_not_product_tonnes():
     n = attach(network(power_carbon=0))
     n.add("Load", "fixed power", bus="Anhui", p_set=3)
