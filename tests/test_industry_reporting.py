@@ -57,6 +57,9 @@ def reporting_network(industry=True):
         n.buses_t.marginal_price[bus] = price
     for bus in n.buses.index.difference(["A", "A2", "B"]):
         n.buses_t.marginal_price[bus] = 1
+    # This fixture supplies analytic dispatch rather than running an optimizer.
+    # Every model cost is zero, so its matching stored objective is exactly zero.
+    n._objective = 0.0
     return n
 
 
