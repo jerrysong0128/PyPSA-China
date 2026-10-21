@@ -16,12 +16,25 @@ import pandas as pd
 import pypsa
 from _helpers import configure_logging, mock_snakemake
 from _pypsa_helpers import assign_locations, calc_lcoe
+from industry_accounting import electricity_consumption_by_province
 
 logger = logging.getLogger(__name__)
 logger = logging.getLogger(__name__)
 idx = pd.IndexSlice
 
 opt_name = {"Store": "e", "Line": "s", "Transformer": "s"}
+
+
+def energy_bus_carriers(n):
+    """Keep energy balances separate from material tonnes and their capacities.
+
+    Legacy networks often leave Bus.unit empty; retain those carriers. Industry
+    product and direct-emissions buses explicitly use t and belong in the
+    dedicated industry/carbon reports instead of MW/MWh tables.
+    """
+    units = n.buses.unit.fillna("").str.strip().str.lower()
+    material = units.isin(["t", "t/h", "tonne", "tonnes", "kg", "kg/h"])
+    return n.buses.loc[~material, "carrier"].unique().tolist()
 
 
 def assign_carriers(n: pypsa.Network):
@@ -256,7 +269,9 @@ def calculate_nodal_capacities(
     reversed_links = n.links.index[~positive_links_mask]
     n_temp.links = n_temp.links.drop(reversed_links)
 
-    nodal_cap = n_temp.statistics.optimal_capacity(groupby=pypsa.statistics.get_bus_and_carrier)
+    nodal_cap = n_temp.statistics.optimal_capacity(
+        groupby=pypsa.statistics.get_bus_and_carrier, bus_carrier=energy_bus_carriers(n_temp)
+    )
     nodal_capacities[label] = nodal_cap.sort_index(level=0)
     return nodal_capacities
 
@@ -295,7 +310,8 @@ def calculate_capacities(
         n.links.loc[pseudo_links, "p_nom_opt"] = 0
     # Calculate optimal capacity using default grouper
     caps = n.statistics.optimal_capacity(
-        groupby=pypsa.statistics.get_carrier_and_bus_carrier, nice_names=False
+        groupby=pypsa.statistics.get_carrier_and_bus_carrier, nice_names=False,
+        bus_carrier=energy_bus_carriers(n),
     )
 
     # Restore original link capacities to avoid modifying the network object
@@ -332,7 +348,8 @@ def calculate_expanded_capacities(
         pd.Dataframe: updated capacities (bad style)
     """
     caps = n.statistics.expanded_capacity(
-        groupby=pypsa.statistics.get_carrier_and_bus_carrier, nice_names=False
+        groupby=pypsa.statistics.get_carrier_and_bus_carrier, nice_names=False,
+        bus_carrier=energy_bus_carriers(n),
     )
 
     if "load shedding" in caps.index.get_level_values(1):
@@ -481,7 +498,8 @@ def calculate_peak_dispatch(n: pypsa.Network, label: str, supply: pd.DataFrame) 
     """
 
     sup_ = n.statistics.supply(
-        groupby=pypsa.statistics.get_carrier_and_bus_carrier, aggregate_time="max"
+        groupby=pypsa.statistics.get_carrier_and_bus_carrier, aggregate_time="max",
+        bus_carrier=energy_bus_carriers(n),
     )
     supply_reordered = sup_.reorder_levels([2, 0, 1])
     supply_reordered.sort_index(inplace=True)
@@ -505,7 +523,10 @@ def calculate_supply_energy(
         pd.DataFrame: updated supply energy balance
     """
 
-    eb = n.statistics.energy_balance(groupby=pypsa.statistics.get_carrier_and_bus_carrier)
+    eb = n.statistics.energy_balance(
+        groupby=pypsa.statistics.get_carrier_and_bus_carrier,
+        bus_carrier=energy_bus_carriers(n),
+    )
     # fragile
     eb_reordered = eb.reorder_levels([2, 0, 1])
     eb_reordered.sort_index(inplace=True)
@@ -535,9 +556,14 @@ def calculate_metrics(n: pypsa.Network, label: str, metrics: pd.DataFrame):
         "line_volume_shadow",
         "co2_shadow",
         "co2_budget",
+        "electricity_consumption_mwh",
+        "peak_electricity_consumption_mw",
     ]
 
     metrics = metrics.reindex(pd.Index(metrics_list).union(metrics.index))
+    electricity = electricity_consumption_by_province(n).sum(axis=1)
+    metrics.at["electricity_consumption_mwh", label] = electricity.dot(n.snapshot_weightings.generators)
+    metrics.at["peak_electricity_consumption_mw", label] = electricity.max()
 
     metrics.at["line_volume_DC", label] = (n.links.length * n.links.p_nom_opt)[
         n.links.carrier == "DC"
@@ -597,6 +623,15 @@ def calculate_weighted_prices(
     load_rev = -1 * n.statistics.revenue(comps="Load", groupby=pypsa.statistics.get_bus_carrier)
     load_withdrawal = n.statistics.withdrawal(comps="Load", groupby=pypsa.statistics.get_bus_carrier)
     prices = (load_rev / load_withdrawal).rename(index={"AC": "electricity"})
+    # Weight the electricity price by actual AC consumption, including process
+    # and electrolysis input. AC-to-AC transmission is not final consumption.
+    electricity = electricity_consumption_by_province(n)
+    weighted = electricity.mul(n.snapshot_weightings.generators, axis=0)
+    total = weighted.sum().sum()
+    prices.loc["electricity"] = (
+        weighted.mul(n.buses_t.marginal_price.reindex(columns=electricity.columns)).sum().sum() / total
+        if total else np.nan
+    )
 
     # --- stores ---
     w = n.statistics.withdrawal(comps="Store")

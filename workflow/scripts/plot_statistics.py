@@ -25,6 +25,7 @@ from _plot_utilities import (
     rename_index,
 )
 from _pypsa_helpers import calc_lcoe, filter_carriers
+from industry_accounting import electricity_consumption_by_province
 from constants import (
     PLOT_CAP_LABEL,
     PLOT_CAP_UNITS,
@@ -348,14 +349,18 @@ def prepare_province_peakload_capacity_data(n, attached_carriers=None):
         bar_cols: List of technology columns to plot as bars.
         color_list: List of colors for each technology.
     """
-    # Calculate peak load per province
-    load = n.loads.copy()
-    load["province"] = load["bus"].map(n.buses["location"])
-    peak_load = n.loads_t.p_set.groupby(load["province"], axis=1).sum().max()
+    # Material Loads are t/h. Electricity also enters conversion Links, including
+    # steel production and electrolysis, so summing Loads alone is insufficient.
+    consumption = electricity_consumption_by_province(n)
+    locations = n.buses.location.reindex(consumption.columns).replace("", pd.NA)
+    locations = locations.fillna(pd.Series(consumption.columns, index=consumption.columns))
+    peak_load = consumption.T.groupby(locations).sum().T.max()
     peak_load = peak_load / PLOT_CAP_UNITS  # ensure peak load is in GW
 
     # Calculate installed capacity per province and technology using optimal_capacity
-    ds = n.statistics.optimal_capacity(groupby=["location", "carrier"]).dropna()
+    ds = n.statistics.optimal_capacity(
+        groupby=["location", "carrier"], bus_carrier="AC"
+    ).dropna()
     valid_components = ["Generator", "StorageUnit", "Link"]
     ds = ds.loc[ds.index.get_level_values(0).isin(valid_components)]
     if ("Link", "battery") in ds.index:
@@ -392,7 +397,7 @@ def prepare_province_peakload_capacity_data(n, attached_carriers=None):
         ]
 
     # Merge peak load and capacity
-    df_plot = cap_by_prov_tech.copy()
+    df_plot = cap_by_prov_tech.reindex(cap_by_prov_tech.index.union(peak_load.index), fill_value=0)
     df_plot["Peak Load"] = peak_load
 
     # Bar columns: exclude Peak Load, only keep nonzero
