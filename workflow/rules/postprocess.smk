@@ -20,6 +20,17 @@ STATISTICS_BARPLOTS = [
 
 if config["foresight"] in ["None", "overnight", "non-pathway", "myopic"]:
 
+    if industry_mode(config) == "endogenous":
+        rule industry_report:
+            input:
+                network=RESULTS_DIR + "/postnetworks/ntwk_{planning_horizons}.nc",
+            output:
+                report_dir=directory(RESULTS_DIR + "/industry/ntwk_{planning_horizons}"),
+            log:
+                LOG_DIR + "/industry_report_ntwk_{planning_horizons}.log",
+            script:
+                "../scripts/industry_reporting.py"
+
     rule plot_network:
         input:
             network=join(

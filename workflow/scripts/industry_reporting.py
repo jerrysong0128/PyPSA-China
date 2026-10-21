@@ -6,8 +6,6 @@ Route costs cover the production Link only. Resource supply costs are reported
 separately; electricity, upstream hydrogen and emission prices are not allocated
 to routes, so these tables are not a full system-objective decomposition.
 """
-from __future__ import annotations
-
 import argparse
 import json
 from pathlib import Path
@@ -196,11 +194,16 @@ def export_industry_reports(n, output_dir):
 
 def main():
     import pypsa
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("network", type=Path)
-    parser.add_argument("output_dir", type=Path)
-    args = parser.parse_args()
-    paths = export_industry_reports(pypsa.Network(args.network), args.output_dir)
+    if "snakemake" in globals():
+        network = snakemake.input.network
+        output_dir = snakemake.output.report_dir
+    else:
+        parser = argparse.ArgumentParser(description=__doc__)
+        parser.add_argument("network", type=Path)
+        parser.add_argument("output_dir", type=Path)
+        args = parser.parse_args()
+        network, output_dir = args.network, args.output_dir
+    paths = export_industry_reports(pypsa.Network(network), output_dir)
     print(json.dumps(paths, indent=2))
 
 
