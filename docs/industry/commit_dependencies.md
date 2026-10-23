@@ -34,8 +34,9 @@ transitive. Raw downloads and generated results do not travel with a cherry-pick
 | `69c34b5` | Carry embedded input provenance into report JSON and CSV labels | `a22b79b`; `52aae43` is the optional metadata producer. Missing historical metadata stays unknown. |
 | `8d78b9d` | Give the hand-calculated reporting fixture its matching zero objective | `4c654dd`; required test companion to `41a7f49` in the reporting bundle. Does not change model behavior. |
 | `5d41cca` | Optional synthetic seasonal benchmark and existing-run record | Corrected core (`5429e08`) + accounting (`27bc0a7`); use the core/audit bundle below. Not needed for minimal usability. |
+| `2fc144b` | PIK resource layout, immutable source exports, GEM September 2026 evidence and workspace development policy | Parent `d0e20ef` and its transitive prerequisites; carry scripts, rules, metadata, fixtures and consumer paths together. Raw sources remain local. |
 
-The final handover documentation commit only updates instructions, validation
+The earlier handover documentation commit only updates instructions, validation
 records and this ledger; it adds no runtime dependency and deliberately does not
 embed its own commit hash.
 
@@ -93,7 +94,11 @@ the original-PIK integration runner. Neither is necessary for the six-hour
 
 The 2026-10-23 source-layout/GEM refresh is a cohesive migration on top of
 `d0e20efb53eb244dcff92fb9549d1006f2dc0ab1` (including its transitive model,
-workflow and validation prerequisites). The historical standalone data bundle
+workflow and validation prerequisites), recorded in `2fc144b`. Use the current
+development branch for this pipeline. To select only this migration on its exact
+parent, apply `git cherry-pick 2fc144b` from a branch already containing
+`d0e20ef`; the historical minimal data-only bundle is not sufficient.
+The historical standalone data bundle
 above retains its historical layout; it is not the current pipeline.
 
 Carry the migration's scripts, `industry_paths.py`, Snakemake include/rules,
