@@ -1,7 +1,7 @@
 # PIK integration validation, 2026-10-21
 
 These are engineering integration checks using the explicitly estimated inputs in
-`data/industry/validation/`. They are not calibrated scientific steel scenarios.
+`resources/derived_data/industry/validation/`. They are not calibrated scientific steel scenarios.
 Original PIK files were read only. Generated networks, solver logs, configurations,
 and numerical audits remain gitignored under `results/industry_validation/`.
 
@@ -166,7 +166,7 @@ python -u scripts/industry_validation/run_pik_validation.py \
   --source-root ../PyPSA-China-PIK \
   --config \
     ../PyPSA-China-PIK/results/v-1.3.2_20261020_hourly_3days/overnight_co2pw-exp175default_topo-current+FCG/run_config.yaml \
-    data/industry/validation/config.yaml \
+    resources/derived_data/industry/validation/config.yaml \
     results/industry_validation/endogenous_annual/override.yaml \
   --network results/industry_validation/off_annual_prepare/brownfield_2030.nc \
   --nuclear-baseline-network ../PyPSA-China-PIK/results/v-1.3.2_20261020_hourly_3days/overnight_co2pw-exp175default_topo-current+FCG/prenetworks-brownfield/ntwk_2020.nc \

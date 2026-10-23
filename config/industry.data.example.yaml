@@ -1,0 +1,7 @@
+# Copy to a local override and set a real complete 2030 hourly HDF (/load).
+# snakemake -s workflow/Snakefile build_industry_validation --cores 1 \
+#   --configfile /path/to/industry-data.yaml
+# The optional validation rule is unavailable while validation_load is null.
+industry_data:
+  validation_load: null
+  validation_assumptions: config/industry.validation_assumptions.yaml

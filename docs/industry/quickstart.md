@@ -51,7 +51,7 @@ For your own PIK run, start with `config/industry.example.yaml` and supply the
 documented annual sector and steel inputs. `off` preserves the original Loads;
 `fixed_load` disaggregates electricity while retaining fixed steel use;
 `endogenous` removes that steel baseline once and attaches the physical process.
-EV charging is configured independently. `data/industry/validation/config.yaml`
+EV charging is configured independently. `resources/derived_data/industry/validation/config.yaml`
 is an explicitly estimated engineering fixture, not a calibrated scenario.
 When endogenous industry is enabled, ordinary `plot_all` includes the industrial
 report directory. The same exporter can read an existing solved file directly:
@@ -60,8 +60,11 @@ report directory. The same exporter can read an existing solved file directly:
 python workflow/scripts/industry_reporting.py solved.nc output_directory
 ```
 
-Original downloads remain under ignored `data/industry/raw/`; source manifests,
-processing code and normalized data are tracked. Missing source/estimate
+Source/version folders under `resources/data/industry/raw/` retain Excel originals,
+source/data snapshots and curated CSVs; generated worksheets and evidence live
+under `resources/derived_data/industry/`. See the [data workflow](data.md) and [guide](../../resources/data/industry/README.md).
+Raw data remain ignored; the guide, source manifests, processing code and
+normalized data are tracked. Missing source/estimate
 declarations appear as unknown, and checksum verification does not establish
 empirical calibration. See [the reference comparison](reference_comparison.md)
 and [commit dependencies](commit_dependencies.md) before selecting commits.

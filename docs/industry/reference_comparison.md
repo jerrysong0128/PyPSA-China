@@ -14,17 +14,18 @@ PyPSA-China-PIK. The adjacent THU checkout is reference material only.
 | Inspected source revision | `f353474b43e20686c42094b04441372dadb68b0a` |
 | Local reference checkout | Sibling directory `../PyPSA-China-THU` |
 | Data record | [Zenodo 19600477](https://zenodo.org/records/19600477), DOI `10.5281/zenodo.19600477`, version 1 |
-| Original archive | `data/industry/raw/thu_reference/data.zip` |
-| Original record metadata | `data/industry/raw/thu_reference/zenodo-record-19600477.json` |
+| Retained extracted data | `resources/data/industry/raw/literature/Lyu et al_2026_Nat.Energy/data/` |
+| Archive/record provenance | `resources/data/industry/sources/manifest.json`, source `lyu_2026_reference_data` |
 | Published archive length | `106509944` bytes |
 | Published archive MD5 | `f8f102698b1f143ae25083f91e337c98` |
 | Data-record licence | **CC-BY-4.0**, verified from `metadata.license.id` in the downloaded Zenodo API response |
 | Verification date | 2026-10-21 |
 
-The original ZIP and API JSON must remain unchanged and ignored by Git. Hashes,
-source identifiers and this comparison may be committed. See the acquisition
-verification section below for actual local checks; published checksum metadata
-alone is not evidence that a download completed.
+The 2026-10-23 cleanup retains extracted model/data files and records the original
+ZIP/API hashes in the tracked source manifest. The duplicate ZIP and API-page
+files were removed from `raw/`. Extracted data remain ignored by Git. See the
+acquisition verification section below for historical archive checks and the
+current extracted-directory check.
 
 The README declares MIT for code, CC0 for data and CC-BY-4.0 for documentation,
 but the inspected tree did not include the named standalone `LICENSES` files.
@@ -119,7 +120,7 @@ the following run records establish the integration scale actually verified.
 
 | Capability | Implementation and verified evidence | Remaining acceptance or research work |
 |---|---|---|
-| Input provenance | Original downloads are retained under ignored `data/industry/raw/`; processing code and processed/validation tables retain source, unit, year and checksum records. The adapter optionally verifies enabled input checksums before mutation, preserves row source/estimate declarations in NetCDF, and reports unknown declarations explicitly. Data, adapter and report tests verify these boundaries. | Replace explicitly labelled engineering assumptions with sufficient provincial/plant observations. Checksums verify bytes, not empirical calibration or redistribution rights. |
+| Input provenance | Original workbooks, extracted source/data snapshots and source CSVs are retained under ignored `resources/data/industry/raw/`; removed PDF/webpage originals keep provenance in `sources/`. Processing code and processed/validation tables retain source, unit, year and checksum records. The adapter optionally verifies enabled input checksums before mutation, preserves row source/estimate declarations in NetCDF, and reports unknown declarations explicitly. Data, adapter and report tests verify these boundaries. | Replace explicitly labelled engineering assumptions with sufficient provincial/plant observations. Checksums verify bytes, not empirical calibration or redistribution rights. |
 | Sector decomposition | `industry_loads.py` and `industry_adapter.py` implement `off`, `fixed_load` and `endogenous` modes. Tests check nonnegative reconstruction, steel within industry, full-year denominators, required provinces and repeat-subtraction rejection. The 31-province 72-hour run reconstructs original electricity with maximum error about `1.46e-11 MW`. | Empirical sector profiles and steel electricity baselines need calibration. Constant annual shares of the provincial hourly shape are an explicit approximation. |
 | Endogenous steel electricity | The adapter removes the specified baseline once; `industry_accounting.py` and the industrial report export original, removed, residual and endogenous electricity separately. Analytic replacement tests, the six-hour workflow and the 72-hour solved audit close the accounting. | Endogenous consumption is allowed to differ from the historical baseline. A future annual scientific result would require a new full-year replacement audit; it is not required for present usability. |
 | Routes and material balances | `industry_model.py` supplies multiport continuous route Links, fixed provincial product demand and distinct active/new capacity. BF–BOF, scrap-EAF and H2–DRI–EAF are present in the integration fixture. Analytic tests verify material, electricity, fuel and upstream H2 electricity balances. | The 72-hour solve does not prove that every route dispatches. Route coefficients, product boundaries, yields and real plant eligibility require research calibration. |
@@ -206,7 +207,7 @@ aluminium results or establishes steel seasonal benefits in China.
 
 ## Acquisition verification
 
-Completed on 2026-10-21:
+Historical acquisition checks completed on 2026-10-21:
 
 - Full Git clone succeeded at `../PyPSA-China-THU`; origin is
   `https://github.com/ruikelyu/PyPSA-China-THU.git`.
@@ -223,24 +224,32 @@ Completed on 2026-10-21:
   extraction or reformatting of the source archive was performed.
 - Downloaded API JSON SHA-256 is
   `95047050af13125f2430cab74bea9bddd5d54e2afa91e295ae3ee80e9fbb9644`.
-- Machine-readable checks and the complete member inventory are retained as
-  `data/industry/raw/thu_reference/local-verification.json` and
-  `data/industry/raw/thu_reference/archive-members.json`.
-- `git check-ignore` confirms that the downloaded ZIP is ignored by
-  `/data/industry/raw/**`.
+- The numerical acquisition checks, DOI, licence and metadata hash are now
+  embedded in `resources/data/industry/sources/manifest.json` under
+  `lyu_2026_reference_data.upstream_archive`.
+- At acquisition, `git check-ignore` confirmed the downloaded ZIP was ignored by
+  `/resources/data/industry/raw/**`.
 
 The archive contains aluminium demand JSON and provincial capacity/demand/share
 CSVs, technology costs, existing infrastructure, load/weather inputs and other
 power-system inputs. It is reference data, **not** a source of calibrated steel
-route coefficients. The member inventory preserves original paths, lengths and
-CRC values without treating `__MACOSX` metadata as scientific tables.
+route coefficients.
+
+On 2026-10-23, all 252 non-macOS files in the existing extraction were compared
+byte-for-byte with the ZIP; legacy filenames were decoded from CP437 to UTF-8
+where required. The cleaned directory retains all 251 model/data files, omitting
+one ancillary geography PDF while preserving the spatial datasets. The duplicate
+ZIP, API JSON and member-list wrappers were removed. The manifest records the
+omitted PDF hash and a directory fingerprint covering every retained file.
+This directory is the data bundle; the sibling THU checkout remains the code
+reference. The folder year is 2026, matching the recorded final article and
+Zenodo version.
 
 To recheck locally without changing the original files:
 
 ```sh
 git -C ../PyPSA-China-THU rev-parse HEAD
 git -C ../PyPSA-China-THU status --short
-shasum -a 256 data/industry/raw/thu_reference/data.zip
-python -m zipfile -t data/industry/raw/thu_reference/data.zip
-git check-ignore -v data/industry/raw/thu_reference/data.zip
+python3 workflow/scripts/industry_data/build_inputs.py --verify-only
+git check-ignore -v 'resources/data/industry/raw/literature/Lyu et al_2026_Nat.Energy/data/aluminum_demand/aluminum_demand_all_scenarios.json'
 ```

@@ -3,13 +3,16 @@
 # All monetary inputs must share the energy network's currency AND price year.
 # Inputs must explicitly target planning year 2030. Project calibration-year
 # shares/quantities upstream; do not relabel historical absolute energy as 2030.
-# Raw downloads belong in data/industry/raw (gitignored); processed data and
-# processing code should retain source_id, estimate_flag and provenance records.
+# Original inputs live in resources/data/industry/raw (gitignored). Generated
+# scenario inputs live in resources/derived_data/industry/scenarios; their
+# processing rules/scripts belong in workflow/. Retain source_id, estimate_flag
+# and provenance records. See config/industry.data.example.yaml for the separate
+# engineering-validation builder; these paths do not imply calibrated inputs.
 sectors:
   industry:
     mode: "off"  # "off" | fixed_load | endogenous (quote off for YAML 1.1)
-    annual_sector_demand: data/industry/processed/sector_electricity_{planning_horizons}.csv
-    carbon_baseline: data/industry/processed/steel_direct_co2_baseline_2020.csv
+    annual_sector_demand: resources/derived_data/industry/scenarios/sector_electricity_{planning_horizons}.csv
+    carbon_baseline: resources/derived_data/industry/scenarios/steel_direct_co2_baseline_2020.csv
     # Required only for endogenous + CO2 reduction scenarios, to extend the
     # power/heat 2020 baseline with steel DIRECT emissions. CSV columns:
     # province,year,route,production_t,direct_co2_t_per_t,source_id,method.
@@ -31,11 +34,11 @@ sectors:
     # Off preserves original loads; fixed_load partitions them; endogenous
     # removes only steel baseline and adds steel-production electricity use.
     steel:
-      annual_demand: data/industry/processed/steel_demand_{planning_horizons}.csv
-      capacities: data/industry/processed/steel_capacities_{planning_horizons}.csv
-      resources: data/industry/processed/steel_resources_{planning_horizons}.csv
-      routes: data/industry/processed/steel_routes_{planning_horizons}.yaml
-      inventory: data/industry/processed/steel_inventory_{planning_horizons}.csv
+      annual_demand: resources/derived_data/industry/scenarios/steel_demand_{planning_horizons}.csv
+      capacities: resources/derived_data/industry/scenarios/steel_capacities_{planning_horizons}.csv
+      resources: resources/derived_data/industry/scenarios/steel_resources_{planning_horizons}.csv
+      routes: resources/derived_data/industry/scenarios/steel_routes_{planning_horizons}.yaml
+      inventory: resources/derived_data/industry/scenarios/steel_inventory_{planning_horizons}.csv
       currency: null  # REQUIRED in endogenous mode; e.g. a verified currency_priceyear label
       inventory_annual_cost_per_t: null  # REQUIRED explicit annual carrying cost
       # annual_demand / inventory CSV: year,province,value,unit (unit=t).

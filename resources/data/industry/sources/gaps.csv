@@ -2,7 +2,7 @@ input,status,evidence,policy
 provincial_sector_electricity,partial,Observed detailed Henan2024 only; NEA national2020 is not provincial industry,Use explicit Henan-share proxy for demo; replace with provincial observation before inference
 2020_direct_steel_co2,missing,CEADs2020 portal identified but inventory not acquired; ferrous combustion boundary differs from crude steel,Explicit production x route-share x direct-factor estimate only; no observed baseline claim
 steel_gross_electricity,unresolved_boundary,MPP BF is negative net purchased; REMIND BF near-zero net approximation; Henan ferrous includes rolling,Do not subtract net export from gross load; require explicit gross scenario and boundary audit
-2020_route_production,partial,GEM63 Chinese plants report crude production; route production incomplete,National/provincial route shares require explicit estimate; 2026capacity is not2020production
+2020_route_production,partial,GEM September2026 V1:35 distinct Chinese plants report2020 crude production (36 numeric source rows); repeated records need reconciliation; route production incomplete,National/provincial route shares require explicit estimate; 2026capacity is not2020production
 2030_scrap_supply,missing,No complete provincial collected-scrap availability acquired,Require finite explicit scenario cap with rationale; EAF capacity not equivalent to scrap availability
 material_inventory_cap,not_established,No applicable physical buffer upper bound verified,Initial inventory0 and inventory upper bound0
 min_load_ramp,not_established,Fraunhofer German assumptions not validated physical province aggregation,Constant hourly output until sourced operation constraints are chosen

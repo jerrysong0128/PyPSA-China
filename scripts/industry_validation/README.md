@@ -3,7 +3,7 @@
 Run from the industry worktree with the `pypsa-china` environment. The runner reads
 original PIK resources and only writes below this worktree's `results/`. Default
 execution builds/prepares a network; add `--solve` to optimize. It does not invent
-steel coefficients. The bundle in `data/industry/validation` is an explicitly
+steel coefficients. The bundle in `resources/derived_data/industry/validation` is an explicitly
 estimated engineering fixture, not a calibrated scientific scenario.
 
 For the current handover, use the [six-hour minimal test](../../docs/industry/quickstart.md).
@@ -17,7 +17,7 @@ python scripts/industry_validation/run_pik_validation.py \
   --source-root ../PyPSA-China-PIK \
   --config \
     ../PyPSA-China-PIK/results/v-1.3.2_20261020_hourly_3days/overnight_co2pw-exp175default_topo-current+FCG/run_config.yaml \
-    data/industry/validation/config.yaml \
+    resources/derived_data/industry/validation/config.yaml \
     results/industry_validation/endogenous_72h/override.yaml \
   --network ../PyPSA-China-PIK/results/v-1.3.2_20261020_hourly_3days/overnight_co2pw-exp175default_topo-current+FCG/prenetworks-brownfield/ntwk_2030.nc \
   --annual-load ../PyPSA-China-PIK/resources/derived_data/overnight_co2pw-exp175default_topo-current+FCG/load/regio_hrly_ac_load_2030.h5 \

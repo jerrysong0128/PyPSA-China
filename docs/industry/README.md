@@ -31,9 +31,17 @@ implemented, rather than copying AGPL code into the MIT project.
 
 ## Data contract
 
-`data/industry/raw/` retains original downloaded bytes and extracted source
-files, and is ignored by Git. `sources/` records URLs, versions, retrieval dates,
-licences and checksums. `processed/` contains redistributable normalized tables.
+Original inputs and curated transcriptions live in `resources/data/industry/`.
+Its single top-level README describes source/version folders; ignored `raw/`
+retains original workbooks and complete source/data snapshots. The tracked
+`sources/` manifest records source versions, units, licences, historical wrapper
+hashes, expected worksheet hashes and directory fingerprints.
+`workflow/rules/industry_data.smk` declares the processing DAG;
+`workflow/scripts/industry_data/` owns the code. Worksheet exports, normalized
+evidence and optional engineering inputs are generated under
+`resources/derived_data/industry/` and excluded from Git. Reviewed CSV snapshots
+under `tests/data/industry/evidence/` are regression fixtures, separate from
+production inputs. See [data preparation](data.md) for commands and boundaries.
 Processing code must reproduce these tables. Missing observations are not zero.
 Every estimate needs its method, input sources, geography and year. Synthetic
 test fixtures must never be described as observed provincial data.

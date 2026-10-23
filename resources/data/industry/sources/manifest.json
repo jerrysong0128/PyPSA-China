@@ -1,0 +1,652 @@
+{
+  "schema_version": 3,
+  "sources": [
+    {
+      "source_id": "gem_2024_plants",
+      "reference_year": "2024-04; production 2019-2022",
+      "license": "CC-BY-4.0",
+      "publisher": "GEM; mirrored by PyPSA-Eur",
+      "original_unit": "ttpa; years; coordinates",
+      "coverage": "Global plant capacity/status and yearly production; >=500ktpa threshold",
+      "retrieved_at_utc": "2026-10-21",
+      "former_local_file": {
+        "path": "raw/gem/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx",
+        "sha256": "f8acee2cfe36ba65ff2f7b691426ee2be58da5b3261e5c3d39575da404805066",
+        "bytes": 842098
+      },
+      "original_path": null,
+      "status": "superseded",
+      "retention_note": "Replaced by the user-supplied September 2026 plant-level release.",
+      "upstream_url": "https://zenodo.org/records/16893375/files/Global-Steel-Plant-Tracker-April-2024-Standard-Copy-V1.xlsx?download=1"
+    },
+    {
+      "source_id": "gem_2026_province_capacity",
+      "original_path": "raw/gem/GEM_2026_09/operating_steel_capacity_provinces_2026_09.xlsx",
+      "download_url": "https://docs.google.com/spreadsheets/d/1MbmZQ9Kms7NGxWxiPsEwYCTb5SAit8zxOgDYUCmOu0U/export?format=xlsx",
+      "reference_year": "2026-09 V1",
+      "license": "CC-BY-4.0",
+      "publisher": "Global Energy Monitor",
+      "original_unit": "thousand tonnes per annum",
+      "coverage": "28 Chinese provinces listed; not 2020 production",
+      "retrieved_at_utc": "2026-10-21",
+      "sha256": "c51f2e689f2d3dfa44f4d8b9b2db2f08b4f53c4c7bde38b18cc6b6f60ca773e8",
+      "bytes": 57100,
+      "former_local_file": {
+        "original_path": "raw/gem/operating_steel_capacity_provinces_2026_09.xlsx",
+        "sha256": "eb7545a8853961f0d61257e836e8ba819ab3c68fa0951bf298e33f7b63f21a91",
+        "bytes": 65730
+      },
+      "status": "retained",
+      "csv_export_directory": "gem/GEM_2026_09/province_capacity",
+      "local_update_date": "2026-10-23",
+      "acquisition": "User-updated local workbook; current digest replaces the old Google export digest.",
+      "csv_exports": [
+        {
+          "path": "gem/GEM_2026_09/province_capacity/MethodChinaCapacitySteel.csv",
+          "sha256": "51d288b8c6f5a2cd4ff6b50bb4db8a88c8a5ffd8c02e64dfb5486c8a3a8be75e",
+          "bytes": 32060
+        }
+      ]
+    },
+    {
+      "source_id": "gem_landing",
+      "reference_year": "2026-09 V1",
+      "license": "CC-BY-4.0 data; website content per publisher",
+      "publisher": "Global Energy Monitor",
+      "original_unit": "n/a",
+      "coverage": "download/version documentation",
+      "retrieved_at_utc": "2026-10-21",
+      "former_local_file": {
+        "path": "raw/gem/global-iron-steel-tracker.html",
+        "sha256": "e27d048e4ac206b835e35671195235a83ecf5b9dccbd2570882cdba2779a35fc",
+        "bytes": 132903
+      },
+      "original_path": null,
+      "status": "reference_only",
+      "retention_note": "Standalone webpage/PDF removed; URL and extracted evidence remain in sources/.",
+      "upstream_url": "https://globalenergymonitor.org/projects/global-iron-steel-tracker"
+    },
+    {
+      "source_id": "nbs_2021_table13_13",
+      "original_path": "sources/nbs_2020_transcription.csv",
+      "reference_year": "2020",
+      "license": "Official public statistics; no explicit open-data license located",
+      "publisher": "National Bureau of Statistics China",
+      "original_unit": "10000 tonnes",
+      "coverage": "China and 31 provinces; three blank steel cells preserved",
+      "retrieved_at_utc": "2026-10-21",
+      "sha256": "03bcf59e992c10869772ee644aaa0e078aa5ce43d9cd5e7530ae2acfbc47d534",
+      "bytes": 1121,
+      "former_local_file": {
+        "original_path": "raw/nbs/C13-13.jpg",
+        "sha256": "cdf37fd098474fc6d434d029997d45d3aefcf105bcc993568f5de9dc7d989905",
+        "bytes": 1398593
+      },
+      "status": "retained",
+      "representation": "reviewed_image_transcription",
+      "upstream_url": "https://www.stats.gov.cn/sj/ndsj/2021/html/C13-13.jpg",
+      "download_url": null
+    },
+    {
+      "source_id": "nbs_2021_index",
+      "reference_year": "2021 edition",
+      "license": "Official public statistics; no explicit open-data license located",
+      "publisher": "National Bureau of Statistics China",
+      "original_unit": "n/a",
+      "coverage": "table titles/year context",
+      "retrieved_at_utc": "2026-10-21",
+      "former_local_file": {
+        "path": "raw/nbs/2021_left.htm",
+        "sha256": "32c91d9a429e13e13ff6327ced93916d97f8c53f513383262b90985e33573e94",
+        "bytes": 61600
+      },
+      "original_path": null,
+      "status": "reference_only",
+      "retention_note": "Standalone webpage/PDF removed; URL and extracted evidence remain in sources/.",
+      "upstream_url": "https://www.stats.gov.cn/sj/ndsj/2021/left.htm"
+    },
+    {
+      "source_id": "nea_henan_2024",
+      "original_path": "raw/statistics/NEA_2024_Henan/electricity_2024.csv",
+      "reference_year": "2024",
+      "license": "Official public statistics; no explicit open-data license located",
+      "publisher": "National Energy Administration Henan office",
+      "original_unit": "100 million kWh",
+      "coverage": "Henan annual electricity; ferrous smelting/rolling broader than crude steel",
+      "retrieved_at_utc": "2026-10-21",
+      "sha256": "88642b0d5ac107fb97053f7bbcdc39318aab506ca61e0a6c9474ec5a9978b3eb",
+      "bytes": 669,
+      "former_local_file": {
+        "original_path": "raw/nea_henan/t20250120_275548.html",
+        "sha256": "6f58da41e258e07369ae6640f1313839704fd4ddc0038461f2b59bc5b413c1d0",
+        "bytes": 39456
+      },
+      "status": "retained",
+      "representation": "HTML_table_extraction",
+      "upstream_url": "https://henb.nea.gov.cn/dtyw/sjfd/202501/t20250120_275548.html",
+      "download_url": null,
+      "additional_files": [
+        {
+          "path": "raw/statistics/NEA_2024_Henan/generation_2024.csv",
+          "sha256": "cb5894bd62b277740bac20e0ec10a318d229068c43c545636df28ae63f766544",
+          "bytes": 241
+        }
+      ]
+    },
+    {
+      "source_id": "nea_national_2020",
+      "original_path": "raw/statistics/NEA_2020_China/electricity_2020.csv",
+      "reference_year": "2020",
+      "license": "Official public statistics; no explicit open-data license located",
+      "publisher": "National Energy Administration",
+      "original_unit": "100 million kWh",
+      "coverage": "national primary/secondary/tertiary/residential; secondary is NOT industry",
+      "retrieved_at_utc": "2026-10-21",
+      "sha256": "7aa33182a8b26cb0b182c9064c2979924230f098e38acec803b1ee20f938f39f",
+      "bytes": 173,
+      "former_local_file": {
+        "original_path": "raw/nea_henan/nea_national_2020.html",
+        "sha256": "b3453ee40ee1ed27280bf4b3038a0b18cce805ef6d9d621312edb7c3686dfa38",
+        "bytes": 7853
+      },
+      "status": "retained",
+      "representation": "official_paragraph_transcription",
+      "upstream_url": "https://www.nea.gov.cn/2021-01/20/c_139682386.htm",
+      "download_url": null
+    },
+    {
+      "source_id": "devlin_2023_supplement",
+      "reference_year": "2023 publication; 2030 scenarios",
+      "license": "CC-BY-4.0 article; verify any third-party material",
+      "publisher": "Devlin et al. Nature Communications",
+      "original_unit": "mixed; see parameter evidence",
+      "coverage": "H2-DRI-EAF material/energy inputs; no physical inventory cap",
+      "retrieved_at_utc": "2026-10-21",
+      "former_local_file": {
+        "path": "raw/literature/41467_2023_38123_MOESM1_ESM.pdf",
+        "sha256": "9219d561ba3c23e3585a4a2b7b2cc2eb54a8bb83e6241086fd7a511fd9b83d99",
+        "bytes": 726786
+      },
+      "original_path": null,
+      "status": "reference_only",
+      "retention_note": "Standalone webpage/PDF removed; URL and extracted evidence remain in sources/.",
+      "upstream_url": "https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fs41467-023-38123-2/MediaObjects/41467_2023_38123_MOESM1_ESM.pdf"
+    },
+    {
+      "source_id": "ceads_province_index",
+      "reference_year": "2020 inventory listing",
+      "license": "No redistribution license verified",
+      "publisher": "CEADs",
+      "original_unit": "n/a",
+      "coverage": "2020 inventory link data-id1407 requires user portal; no data acquired",
+      "retrieved_at_utc": "2026-10-21",
+      "former_local_file": {
+        "path": "raw/literature/ceads_province.html",
+        "sha256": "1a5ccd0fd5adfde1fe65da4f33b2886023eaa839d2c97eb3a002f4908223dfb4",
+        "bytes": 50664
+      },
+      "original_path": null,
+      "status": "reference_only",
+      "retention_note": "Standalone webpage/PDF removed; URL and extracted evidence remain in sources/.",
+      "upstream_url": "https://ceads.net/data/province/"
+    },
+    {
+      "source_id": "ceads_download_documentation",
+      "reference_year": "retrieval date",
+      "license": "Website code; not licensed for redistribution; raw ignored",
+      "publisher": "CEADs",
+      "original_unit": "n/a",
+      "coverage": "public link redirects user/index.php?id=1407; no authentication attempted",
+      "retrieved_at_utc": "2026-10-21",
+      "former_local_file": {
+        "path": "raw/literature/ceads_custom.js",
+        "sha256": "10325aef6861c96fb45dbdcd2ee6c1e9b2e85d29f9e459457200af022acbae18",
+        "bytes": 1164
+      },
+      "original_path": null,
+      "status": "reference_only",
+      "retention_note": "Standalone webpage/PDF removed; URL and extracted evidence remain in sources/.",
+      "upstream_url": "https://ceads.net/public/js/custom.js"
+    },
+    {
+      "source_id": "mpp_business_cases",
+      "original_path": "raw/literature/MPP_2022_steel-model/technology_business_cases.csv",
+      "download_url": "https://raw.githubusercontent.com/missionpossiblepartnership/mpp-steel-model/9eca52db92bd2d9715f30e98ccaaf36677fdb516/mppsteel/data/import_data/Technology%20Business%20Cases.csv",
+      "reference_year": "fixed commit 9eca52db92bd2d9715f30e98ccaaf36677fdb516; costs 2020-2050",
+      "license": "Repository license not yet verified; candidate numerical facts only",
+      "publisher": "Mission Possible Partnership",
+      "original_unit": "t/tsteel; GJ/tsteel",
+      "coverage": "Global technology assumptions; not China observations",
+      "retrieved_at_utc": "2026-10-21",
+      "sha256": "3a81e31464f25f9692dd07e309340a79bab2280e77dee0685bc0a571ee01315a",
+      "bytes": 3881,
+      "former_local_file": {
+        "original_path": "raw/literature/mpp_technology_business_cases.csv",
+        "sha256": "3a81e31464f25f9692dd07e309340a79bab2280e77dee0685bc0a571ee01315a",
+        "bytes": 3881
+      },
+      "status": "retained"
+    },
+    {
+      "source_id": "mpp_capex_opex",
+      "original_path": "raw/literature/MPP_2022_steel-model/capex_opex.xlsx",
+      "download_url": "https://raw.githubusercontent.com/missionpossiblepartnership/mpp-steel-model/9eca52db92bd2d9715f30e98ccaaf36677fdb516/mppsteel/data/import_data/CAPEX%20OPEX%20Per%20Technology.xlsx",
+      "reference_year": "fixed commit 9eca52db92bd2d9715f30e98ccaaf36677fdb516; costs 2020-2050",
+      "license": "Repository license not yet verified; candidate numerical facts only",
+      "publisher": "Mission Possible Partnership",
+      "original_unit": "cost unit not explicit in workbook; see PyPSA technology-data references",
+      "coverage": "Global technology assumptions; not China observations",
+      "retrieved_at_utc": "2026-10-21",
+      "sha256": "95d2b30f3ae26bc630d2a84ff2c4cfeeded45dee3a89a26eb3434fd849c70365",
+      "bytes": 33584,
+      "former_local_file": {
+        "original_path": "raw/literature/mpp_capex_opex.xlsx",
+        "sha256": "95d2b30f3ae26bc630d2a84ff2c4cfeeded45dee3a89a26eb3434fd849c70365",
+        "bytes": 33584
+      },
+      "status": "retained",
+      "csv_export_directory": "literature/MPP_2022_steel-model/capex_opex",
+      "csv_exports": [
+        {
+          "path": "literature/MPP_2022_steel-model/capex_opex/GF capex.csv",
+          "sha256": "cd26c0d80cceb255965cc558eba128b97ddfce32b5ce756dafa9bc8fd254ad41",
+          "bytes": 12568
+        },
+        {
+          "path": "literature/MPP_2022_steel-model/capex_opex/Other Opex.csv",
+          "sha256": "86af3c3eb269ec102c38b614b5e47e56267be7df8a7b2e365b796461e96d8c8e",
+          "bytes": 13420
+        },
+        {
+          "path": "literature/MPP_2022_steel-model/capex_opex/Renewal capex.csv",
+          "sha256": "f0fd3aea8a8531113dc29ad57be53902a1604d956d3e2c7311c3570e8d91bd5d",
+          "bytes": 10970
+        }
+      ]
+    },
+    {
+      "source_id": "bachorz_2026_supplement",
+      "local_origin": "/Users/jerrysong/Study_PKU/IAM_Workspace/IAM_CoC/Data/NatClimChang_Bachorz et al._2026/41558_2026_2635_MOESM1_ESM.pdf",
+      "landing_url": "https://www.nature.com/articles/s41558-026-02635-8",
+      "reference_year": "2026 publication; code commit 051c3ec4d9b7d7cc97086a1822d28b948435a48c",
+      "license": "Open access article; verify applicable reuse license",
+      "publisher": "Bachorz et al.; REMIND",
+      "original_unit": "mixed; original archive or PDF",
+      "coverage": "Copied byte-for-byte from user research archive; process parameters are model assumptions not observations",
+      "retrieved_at_utc": "2026-10-21",
+      "former_local_file": {
+        "path": "raw/literature/41558_2026_2635_MOESM1_ESM.pdf",
+        "sha256": "af3bc565c1b4745831c1279914bca0e2b2830c9211dbed9e8272d849d53c3f29",
+        "bytes": 4069976
+      },
+      "original_path": null,
+      "status": "reference_only",
+      "retention_note": "Standalone webpage/PDF removed; URL and extracted evidence remain in sources/.",
+      "upstream_url": "https://www.nature.com/articles/s41558-026-02635-8"
+    },
+    {
+      "source_id": "bachorz_remind_code",
+      "original_path": "raw/literature/Bachorz et al_2026_Nat.Clim.Change/remind/modules/37_industry/subsectors/datainput.gms",
+      "local_origin": "/Users/jerrysong/Study_PKU/IAM_Workspace/IAM_CoC/Data/NatClimChang_Bachorz et al._2026/remind-steel-LockIn-051c3ec4.zip",
+      "landing_url": "https://www.nature.com/articles/s41558-026-02635-8",
+      "reference_year": "2026 publication; code commit 051c3ec4d9b7d7cc97086a1822d28b948435a48c",
+      "license": "REMIND AGPL-3.0; inspect archive LICENSE",
+      "publisher": "Bachorz et al.; REMIND",
+      "original_unit": "mixed; original archive or PDF",
+      "coverage": "Copied byte-for-byte from user research archive; process parameters are model assumptions not observations",
+      "retrieved_at_utc": "2026-10-21",
+      "sha256": "7b3fdd7400bb3d300b5aa2472fb463e4c68d47799488d7cb2627a9e90ab05ab9",
+      "bytes": 37975,
+      "former_local_file": {
+        "original_path": "raw/literature/remind-steel-LockIn-051c3ec4.zip",
+        "sha256": "73d6ce7d4bc150c8184b8484e98b8a9b3ccd2b5fc27431c67669b1a8b5c51d72",
+        "bytes": 4007836
+      },
+      "status": "retained",
+      "representation": "complete_source_snapshot",
+      "upstream_url": "https://www.nature.com/articles/s41558-026-02635-8",
+      "download_url": null,
+      "repository_directory": "raw/literature/Bachorz et al_2026_Nat.Clim.Change/remind",
+      "upstream_archive": {
+        "original_path": "raw/literature/remind-steel-LockIn-051c3ec4.zip",
+        "sha256": "73d6ce7d4bc150c8184b8484e98b8a9b3ccd2b5fc27431c67669b1a8b5c51d72",
+        "bytes": 4007836
+      },
+      "directory_fingerprint": {
+        "algorithm": "sha256 of sorted relative-path NUL file-sha256 LF records",
+        "sha256": "86c06a4e3762da12d965c8ebeb5752865672edeb112b340340a5add9244b4018",
+        "files": 962,
+        "bytes": 7383003
+      }
+    },
+    {
+      "source_id": "neu_2016",
+      "original_path": "raw/literature/Li et al_2016_J.Northeastern.Univ/table1_inputs.csv",
+      "reference_year": "2016 publication; plant observations preceding publication",
+      "license": "No explicit reuse license verified; numerical facts only",
+      "publisher": "Journal of Northeastern University",
+      "original_unit": "kWh/t study functional steel; kg/t; g/t",
+      "coverage": "One representative steel enterprise; BF BOF casting and partial hot rolling; not China average",
+      "retrieved_at_utc": "2026-10-21",
+      "sha256": "a240c4f047426b806854b83d0b5900fc546fc051760dbf3a76835eca7b3f67e9",
+      "bytes": 1332,
+      "former_local_file": {
+        "original_path": "raw/literature/neu_2016_electricity.html",
+        "sha256": "85447192078b00782ea104a2643b9329ffa3534170d3153626389db523a1f600",
+        "bytes": 57429
+      },
+      "status": "retained",
+      "representation": "HTML_scientific_tables_with_expanded_spans",
+      "upstream_url": "https://xuebao.neu.edu.cn/natural/article/html/2016-3-352.htm",
+      "download_url": null,
+      "additional_files": [
+        {
+          "path": "raw/literature/Li et al_2016_J.Northeastern.Univ/table2_outputs.csv",
+          "sha256": "ac8cc278eba090d139fa0906c418f5ae794e96da459cc03ebd6577c5d7ab6d35",
+          "bytes": 790
+        },
+        {
+          "path": "raw/literature/Li et al_2016_J.Northeastern.Univ/table3_process_comparison.csv",
+          "sha256": "42cabc837b8cf99673e12abdf75080b6c9607748c683f18ec3c8b86c004d3f41",
+          "bytes": 636
+        },
+        {
+          "path": "raw/literature/Li et al_2016_J.Northeastern.Univ/table4_process_indicators.csv",
+          "sha256": "40a92faea4c1b2607d015753b49e8381d4b198d597187ebd589ba57bddad03f5",
+          "bytes": 1068
+        }
+      ]
+    },
+    {
+      "source_id": "gem_2026_plants",
+      "original_path": "raw/gem/GEM_2026_09/Plant-level data - Global Iron and Steel Tracker - September 2026 (V1).xlsx",
+      "sha256": "25697b03d6a95f297d73e3efb964f017cdc5cd8966b6b3201f3f0a9ee7a56199",
+      "bytes": 764437,
+      "csv_export_directory": "gem/GEM_2026_09/plant_level",
+      "status": "retained",
+      "publisher": "Global Energy Monitor",
+      "license": "CC-BY-4.0; attribution retained in exported About/Metadata sheets",
+      "reference_year": "2026-09 V1; production 2019-2025",
+      "original_unit": "Mixed; see original sheet headers and Metadata CSV",
+      "acquisition": "User-supplied local workbook; download date and exact download URL not recorded",
+      "local_inventory_date": "2026-10-23",
+      "download_url": null,
+      "csv_exports": [
+        {
+          "path": "gem/GEM_2026_09/plant_level/About.csv",
+          "sha256": "8d3d49e5a0a1536794e8bfd9f623475cc7e93fc480e07499e4772fc630dd2ae8",
+          "bytes": 37477
+        },
+        {
+          "path": "gem/GEM_2026_09/plant_level/Metadata.csv",
+          "sha256": "b8709cec8fcc0816349e259ee619d42fb27358d82f88d1aad238596a989053c3",
+          "bytes": 38942
+        },
+        {
+          "path": "gem/GEM_2026_09/plant_level/Plant capacities and status.csv",
+          "sha256": "0952c58c7de14a16419c28bc84dfdf29b501403eef8b57cdbca386b94ccfc2da",
+          "bytes": 305136
+        },
+        {
+          "path": "gem/GEM_2026_09/plant_level/Plant data.csv",
+          "sha256": "caf348c7befdbaa6881d8ddfb4d3d5cfdbe15dae0bd86a7717773edc8855cfd0",
+          "bytes": 996617
+        },
+        {
+          "path": "gem/GEM_2026_09/plant_level/Plant production.csv",
+          "sha256": "0386b43d2862855fe8bd95d3f50622b33a37a20886eaea54a12ad487e63de4d7",
+          "bytes": 182415
+        }
+      ]
+    },
+    {
+      "source_id": "gem_2026_steel_units",
+      "original_path": "raw/gem/GEM_2026_09/Steel unit data - Global Iron and Steel Tracker - September 2026 (V1).xlsx",
+      "sha256": "47b8992e372331e81a1e06cc86679089705efe2d104d439e19e2eb80e35edc67",
+      "bytes": 471405,
+      "csv_export_directory": "gem/GEM_2026_09/steel_units",
+      "status": "retained",
+      "publisher": "Global Energy Monitor",
+      "license": "CC-BY-4.0; attribution retained in exported About/Metadata sheets",
+      "reference_year": "2026-09 V1",
+      "original_unit": "Mixed; see original sheet headers and Metadata CSV",
+      "acquisition": "User-supplied local workbook; download date and exact download URL not recorded",
+      "local_inventory_date": "2026-10-23",
+      "download_url": null,
+      "csv_exports": [
+        {
+          "path": "gem/GEM_2026_09/steel_units/About.csv",
+          "sha256": "8ec812dcc695363fd0fd88d530f6110eff375d91107dc1364d6393c5cd11ff05",
+          "bytes": 35390
+        },
+        {
+          "path": "gem/GEM_2026_09/steel_units/Basic oxygen furnaces.csv",
+          "sha256": "34aeb61369e7efe335ef74418b2b07a3455269ff51194644deda75c781474d85",
+          "bytes": 327268
+        },
+        {
+          "path": "gem/GEM_2026_09/steel_units/Electric arc furnaces.csv",
+          "sha256": "7b38ad0dd171721511940501df9e86e71ca2a904655bdc92ff84e39f0f510456",
+          "bytes": 372291
+        },
+        {
+          "path": "gem/GEM_2026_09/steel_units/Induction furnaces.csv",
+          "sha256": "0873e0d1cdb1547a6b9b933fef5fa826c925444a65bb37a6b79d37e1cec20890",
+          "bytes": 158772
+        },
+        {
+          "path": "gem/GEM_2026_09/steel_units/Metadata.csv",
+          "sha256": "1cee0eb0c205c45211bd793e0d9406e922965b33ea55c632d8a61bb9c2196e01",
+          "bytes": 42511
+        },
+        {
+          "path": "gem/GEM_2026_09/steel_units/Open hearth furnaces.csv",
+          "sha256": "ee7c715e3fe03b2dc6678a9fda4cfce1d8bbb4564feb6420e2d7b9aa39d20192",
+          "bytes": 2348
+        }
+      ]
+    },
+    {
+      "source_id": "gem_2026_iron_units",
+      "original_path": "raw/gem/GEM_2026_09/Iron unit data - Global Iron and Steel Tracker - September 2026 (V1).xlsx",
+      "sha256": "c9f6cf315520fae60703546bcf1bb75da3d66895446783910487dbf3a1694175",
+      "bytes": 377759,
+      "csv_export_directory": "gem/GEM_2026_09/iron_units",
+      "status": "retained",
+      "publisher": "Global Energy Monitor",
+      "license": "CC-BY-4.0; attribution retained in exported About/Metadata sheets",
+      "reference_year": "2026-09 V1",
+      "original_unit": "Mixed; see original sheet headers and Metadata CSV",
+      "acquisition": "User-supplied local workbook; download date and exact download URL not recorded",
+      "local_inventory_date": "2026-10-23",
+      "download_url": null,
+      "csv_exports": [
+        {
+          "path": "gem/GEM_2026_09/iron_units/About.csv",
+          "sha256": "1822b0cd79ebeb0ceeffc4a71fe031dadc0195881c2fd0148dd5aa4a06c77a56",
+          "bytes": 35932
+        },
+        {
+          "path": "gem/GEM_2026_09/iron_units/Blast furnace relinings.csv",
+          "sha256": "8f2961ebfcadc88a581da2ada7798278661c462dac1b162c01cb61c6fe236ce4",
+          "bytes": 78036
+        },
+        {
+          "path": "gem/GEM_2026_09/iron_units/Blast furnaces.csv",
+          "sha256": "a0ee6156ecca457dd58ba1351cc912673f5cf43e4673978e5df332912d303b2e",
+          "bytes": 358477
+        },
+        {
+          "path": "gem/GEM_2026_09/iron_units/Direct reduced iron furnaces.csv",
+          "sha256": "fb54f8d204c566df986dd96a6cffabd627446b8cabe1912d4f61390f56650389",
+          "bytes": 176676
+        },
+        {
+          "path": "gem/GEM_2026_09/iron_units/Metadata.csv",
+          "sha256": "fd39fd31e044f8660ed6a8e327c0fb316f9fa7ab59dbf0c84ca92671ca9486da",
+          "bytes": 38530
+        }
+      ]
+    },
+    {
+      "source_id": "gem_2026_ownership",
+      "original_path": "raw/gem/GEM_2026_09/Global-Energy-Ownership-Tracker-September-2026-V2.xlsx",
+      "sha256": "8dd5c4ec873efe5e774c4822614439b5ad2da6bcf452a2c58851454d64e275be",
+      "bytes": 55061036,
+      "csv_export_directory": "gem/GEM_2026_09/ownership",
+      "status": "retained",
+      "publisher": "Global Energy Monitor",
+      "license": "CC-BY-4.0; attribution retained in exported About/Metadata sheets",
+      "reference_year": "2026-09 V2",
+      "original_unit": "Mixed; see original sheet headers and Metadata CSV",
+      "acquisition": "User-supplied local workbook; download date and exact download URL not recorded",
+      "local_inventory_date": "2026-10-23",
+      "download_url": null,
+      "csv_exports": [
+        {
+          "path": "gem/GEM_2026_09/ownership/About.csv",
+          "sha256": "8f9e3e23af01fa2b3eed8cb181ad36c42b9269ca47ddae9f1a76d51aa7dec879",
+          "bytes": 11371
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/All Entities.csv",
+          "sha256": "330c5870b4397484f9cd1b46d9effc5fa33d6666cbc0ebd8b2145ac5836b8436",
+          "bytes": 7626069
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Asset Ownership.csv",
+          "sha256": "e6050e1c37f01d11d0256727d75b611dbb23697ac4c3c13b2b8b2fe5d939e0ba",
+          "bytes": 7831692
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Bioenergy Power Ownership.csv",
+          "sha256": "7bc39dfb997d0bbdcca649083cfd417771e3dde5ebb758455fdd5e45983c41c2",
+          "bytes": 18654885
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Cement and Concrete Ownership.csv",
+          "sha256": "6cfd104b431b842fbef38db33f09942295564050767ca9167d65c2fd2ff8a30a",
+          "bytes": 6193548
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Coal Mine Ownership.csv",
+          "sha256": "c38f890e15fa6cb54bb94382da7c5c451e4a48605bc884ce76f38f979ca84473",
+          "bytes": 13586732
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Coal Plant Ownership.csv",
+          "sha256": "b8fdcb718c226376c7aa23ece38f3201ed2d793680ad9e3ac6c873a6aead0c6d",
+          "bytes": 68914265
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Entity Ownership.csv",
+          "sha256": "12148d7b57ad16149f5b3d5effcf4423c09797657bf92eac0d5475095ad7b6b6",
+          "bytes": 5329306
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Gas Pipeline Ownership.csv",
+          "sha256": "2e85f6bbaa5cfb3a78f0f9e006fbdeeda663f82d162e67be4c6d3b5e524b06ef",
+          "bytes": 24060704
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Gas Plant Ownership.csv",
+          "sha256": "2af3670ad55992c1c2270639ede2556b5b3b8ae4c99a00edd533b6951633c08f",
+          "bytes": 82131060
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Iron Mine Ownership.csv",
+          "sha256": "7abfc95063a824d10a86ffe4f01c39894f03c9bceb730da99e21cefc6561d67d",
+          "bytes": 7558622
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Oil & NGL Pipeline Ownership.csv",
+          "sha256": "ef5e88df8eff0e051379109fd22688d52a9beb253ce7671a0e554fab89c3f434",
+          "bytes": 11682096
+        },
+        {
+          "path": "gem/GEM_2026_09/ownership/Steel Plant Ownership.csv",
+          "sha256": "6a1ba767e2902ee800b3b15345410d12881f5105ddf587c64264a3bb37e454cc",
+          "bytes": 9681213
+        }
+      ]
+    },
+    {
+      "source_id": "gem_2025_materials",
+      "original_path": "raw/gem/GEM_2025_12/Production-Consumption-of-Met-Coal-Iron-Ore-by-Steel-Industry-December-2025-Standard-Copy-V1.xlsx",
+      "sha256": "399b9ce88985b3bcc6642ad32950e345387c9c5e78c7597d9d63155fde613f2f",
+      "bytes": 22821,
+      "csv_export_directory": "gem/GEM_2025_12/materials",
+      "status": "retained",
+      "publisher": "Global Energy Monitor",
+      "license": "CC-BY-4.0; attribution retained in exported About/Metadata sheets",
+      "reference_year": "2025-12 V1",
+      "original_unit": "Mixed; see original sheet headers and Metadata CSV",
+      "acquisition": "User-supplied local workbook; download date and exact download URL not recorded",
+      "local_inventory_date": "2026-10-23",
+      "download_url": null,
+      "csv_exports": [
+        {
+          "path": "gem/GEM_2025_12/materials/Metadata.csv",
+          "sha256": "3f8ad2888ad67969a747f8a4dbe9ff019e4823df89d589c9d5f2974dcc6f76c0",
+          "bytes": 3983
+        },
+        {
+          "path": "gem/GEM_2025_12/materials/ProdConsMetCoalIronOre.csv",
+          "sha256": "050ad0829cea42150beafff6f0e388d507f2b764d1e4ed65743fdf493c6fc642",
+          "bytes": 16231
+        }
+      ]
+    },
+    {
+      "source_id": "lyu_2026_reference_data",
+      "status": "retained",
+      "original_path": null,
+      "representation": "extracted_model_data_bundle",
+      "repository_directory": "raw/literature/Lyu et al_2026_Nat.Energy/data",
+      "publisher": "Lyu et al.; Nature Energy",
+      "reference_year": "2026; Zenodo publication 2026-04-16",
+      "license": "CC-BY-4.0",
+      "doi": "10.5281/zenodo.19600477",
+      "upstream_url": "https://zenodo.org/records/19600477/files/data.zip?download=1",
+      "upstream_archive": {
+        "verified_at_utc": "2026-10-21T11:31:31.428877+00:00",
+        "url": "https://zenodo.org/records/19600477/files/data.zip?download=1",
+        "record_id": 19600477,
+        "doi": "10.5281/zenodo.19600477",
+        "license": "cc-by-4.0",
+        "bytes": 106509944,
+        "md5": "f8f102698b1f143ae25083f91e337c98",
+        "sha256": "18a4b3861a5efd0cf2e4be619b28a6af8317b9fea7d971731a2aff12c87adf3f",
+        "expected_md5": "f8f102698b1f143ae25083f91e337c98",
+        "expected_bytes": 106509944,
+        "zip_test_bad_member": null,
+        "zip_members": 572,
+        "metadata_sha256": "95047050af13125f2430cab74bea9bddd5d54e2afa91e295ae3ee80e9fbb9644"
+      },
+      "coverage": "All 251 model/data files retained; one ancillary geography PDF, __MACOSX and .DS_Store omitted; this is the data bundle, not the code repository",
+      "extraction_verification": "Every scientific file compared byte-for-byte with the original archive on 2026-10-23; legacy ZIP filenames decoded CP437->UTF-8 where necessary",
+      "directory_fingerprint": {
+        "algorithm": "SHA256 of sorted relative_path + NUL + file_sha256 + newline",
+        "files": 251,
+        "bytes": 147282419,
+        "sha256": "7fce26fc35fc5b34409d945b624dacbe0aded87479492777ca9ff57eeab2252c"
+      },
+      "retention_note": "All 251 model/data files retained byte-for-byte after matching the published archive; macOS metadata, duplicate ZIP and one ancillary geography PDF omitted.",
+      "omitted_ancillary_files": [
+        {
+          "path": "province_shapes/chn_adm_ocha_2020_shp/CHN COD-AB 2020_09_10.pdf",
+          "sha256": "820bd86e38089eb458421394b23184149af9f02c002700e840f6674f7e00b979",
+          "reason": "Ancillary PDF documentation; numerical and spatial files retained"
+        }
+      ]
+    }
+  ],
+  "organized_at": "2026-10-23",
+  "retention_policy": "Original workbooks, complete source/data snapshots and curated source CSVs in resources/data/industry; all generated workbook exports and model inputs in resources/derived_data/industry; standalone PDFs/webpages and duplicate archives removed.",
+  "path_bases": {
+    "original_path": "resources/data/industry",
+    "repository_directory": "resources/data/industry",
+    "csv_export_directory": "resources/derived_data/industry/source_tables",
+    "csv_exports.path": "resources/derived_data/industry/source_tables"
+  }
+}

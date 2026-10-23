@@ -42,7 +42,7 @@ embed its own commit hash.
 ## Selectable bundles
 
 Run these commands from the target repository **after making the source commits
-available there**. The source branch is currently local. Start from the named
+available there**. Fetch `origin/codex/industry-steel-2030` first. Start from the named
 PIK base or assess changes in the formal-work base first. Do not reset an existing
 working branch to follow these examples.
 
@@ -90,6 +90,36 @@ the original-PIK integration runner. Neither is necessary for the six-hour
 [usability check](quickstart.md).
 
 ## Verification boundary
+
+The 2026-10-23 source-layout/GEM refresh is a cohesive migration on top of
+`d0e20efb53eb244dcff92fb9549d1006f2dc0ab1` (including its transitive model,
+workflow and validation prerequisites). The historical standalone data bundle
+above retains its historical layout; it is not the current pipeline.
+
+Carry the migration's scripts, `industry_paths.py`, Snakemake include/rules,
+schema-3 source manifest, configuration paths, regression fixtures and consumer
+path fix together. Evidence production uses the standard library; the optional
+validation builder uses the existing PyPSA environment and `industry_model`.
+No environment-package dependency was added. These migrations have not been
+certified as an independent cherry-pick onto a later formal-work revision.
+
+Raw downloads remain local under `resources/data/industry/raw`; generated exports,
+evidence and engineering inputs remain ignored under
+`resources/derived_data/industry`. Restore raw inputs using the
+[source guide](../../resources/data/industry/README.md), then run the rules in
+[data.md](data.md). Normal builds verify registered checksums without rewriting
+the source manifest. Regenerate the validation bundle after any source or
+implementation change. Its estimates remain engineering checks, not calibrated
+research results. Historical bundle audits below concern their stated commits.
+
+Current migration checks: **107 industrial tests passed from an exported index
+snapshot**, without ignored raw downloads or unrelated local changes. The real
+three-rule Snakemake pipeline rebuilt 35 worksheet exports, eight evidence tables
+and nine validation files. All eight evidence files matched the reviewed
+fixtures; seven numerical/route validation files were byte-identical to the
+pre-migration outputs. All source/implementation/output hashes verified, and a
+subsequent dry-run required no jobs. The configured pre-commit hooks passed.
+These checks do not constitute an annual scientific optimization.
 
 The parent worktree passed all **101 industrial tests** on 2026-10-21. Each of the
 six bundles above was also applied by actual cherry-picks into detached temporary

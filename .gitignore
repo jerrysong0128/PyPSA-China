@@ -37,6 +37,7 @@ __pycache__
 .claude
 CLAUDE.md
 
-# Industrial source downloads are retained locally, including original CSVs.
-/data/industry/raw/**
-!/data/industry/raw/.gitkeep
+# Industrial source downloads remain local, including original CSVs.
+/resources/data/industry/raw/**
+!/resources/data/industry/README.md
+!/resources/data/industry/sources/manifest.json

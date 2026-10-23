@@ -8,10 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Industrial source-export, evidence and optional validation-input rules with
+  explicit source/helper dependencies, checksum guards and regression fixtures.
+- Workspace development guidance covering data layout, validation, commit
+  dependencies and Codex co-authorship.
+
 ### Changed
+- Align industry sources with `resources/data/industry`, generated tables with
+  `resources/derived_data/industry`, and processing with `workflow/scripts`.
+- Refresh GEM steel evidence to the September 2026 release while preserving
+  missing values, operating status, source coordinates and duplicate records.
+
 ### Deprecated
 ### Removed
+- Redundant local industry PDF/HTML wrappers and duplicate archives; keep the
+  complete source snapshots, original workbooks and provenance records.
+
 ### Fixed
+- Resolve industry source/generated paths against the current worktree when
+  reusing external PIK energy resources.
+
 ### Security
 
 ## [1.3.0] - 2025-12-02

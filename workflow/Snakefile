@@ -99,6 +99,10 @@ rule process_config:
         config="config_test.yaml"
     script:
         "scripts/process_config.py"
+
+# Keep optional data-preparation rules after the existing workflow targets.
+include: "rules/industry_data.smk"
+
 #    ======== Workflow ===========
 rule build_population:
     input:
