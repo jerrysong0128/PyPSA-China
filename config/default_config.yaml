@@ -8,7 +8,7 @@ run:
 foresight: "overnight"
 
 paths:
-  results_dir: "results/"
+  results_dir: "add-on/results/"
   costs_dir: "resources/data/costs/default"
   yearly_regional_load: 
     ac: "resources/data/load/Provincial_Load_2020_2060_MWh.csv" # 2025 load is repalced by the 2024 national bureau of statistics: https://data.stats.gov.cn/easyquery.htm?cn=E0103
