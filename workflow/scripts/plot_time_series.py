@@ -45,6 +45,7 @@ def plot_energy_balance(
     aggregate_fossil=False,
     add_load_line=True,
     add_reserves=False,
+    resample_freq: str | None = None,
     ax: plt.Axes = None,
 ):
     """Plot the electricity balance of the network for the given time range
@@ -57,6 +58,9 @@ def plot_energy_balance(
         end_date (str, optional): the range to plot. Defaults to "2060-04-06 12:00:00".
         aggregate_fossil (bool, optional): whether to aggregate fossil fuels. Defaults to False.
         add_load_line (bool, optional): add a dashed line for the load. Defaults to True.
+        resample_freq (str, optional): pandas resample rule (e.g. "D" or "MS"). When set,
+            each period is shown as weighted energy (snapshot weight x power) rather than
+            instantaneous power. Defaults to None (no resampling).
     """
     if not ax:
         fig, ax = plt.subplots(figsize=(16, 8))
@@ -74,6 +78,26 @@ def plot_energy_balance(
     )
 
     p = p.loc[start_date:end_date]
+    if p.empty:
+        logger.warning(
+            "No snapshots between %s and %s; writing an empty balance plot.", start_date, end_date
+        )
+        ax.text(
+            0.5,
+            0.5,
+            f"No snapshots between\n{start_date} and {end_date}",
+            ha="center",
+            va="center",
+            transform=ax.transAxes,
+            fontsize=14,
+        )
+        ax.set_axis_off()
+        fig.tight_layout()
+        return ax
+    if resample_freq:
+        # Snapshot weights are hours, so MW * h summed over a period gives period energy.
+        weights = n.snapshot_weightings.generators.reindex(p.index)
+        p = p.mul(weights, axis=0).resample(resample_freq).sum()
     p.rename(columns={"-": "Load", "AC": "transmission losses"}, inplace=True)
 
     # aggreg fossil
@@ -124,25 +148,44 @@ def plot_energy_balance(
 
     supply = supply.reindex(columns=plot_order)
     charge = charge.reindex(columns=plot_order_charge)
+    if supply.empty and charge.empty:
+        logger.warning("No numeric energy balance data for %s; writing an empty plot.", bus_carrier)
+        ax.text(
+            0.5,
+            0.5,
+            f"No {bus_carrier} energy balance data",
+            ha="center",
+            va="center",
+            transform=ax.transAxes,
+            fontsize=14,
+        )
+        ax.set_axis_off()
+        fig.tight_layout()
+        return ax
     if not charge.empty:
         charge.plot.area(ax=ax, linewidth=0, color=color_series.loc[charge.columns])
 
-    supply.plot.area(
-        ax=ax,
-        linewidth=0,
-        color=color_series.loc[supply.columns].values,
-    )
-    if add_load_line:
-        # charge.rename(columns={"Heat Load": "Load"}, inplace=True)
+    if not supply.empty:
+        supply.plot.area(
+            ax=ax,
+            linewidth=0,
+            color=color_series.loc[supply.columns].values,
+        )
+    if add_load_line and "Load" in charge:
         charge["load_pos"] = charge["Load"] * -1
         charge["load_pos"].plot(linewidth=2, color="black", label="Load", ax=ax, linestyle="--")
         charge.drop(columns="load_pos", inplace=True)
 
     ax.legend(ncol=1, loc="center left", bbox_to_anchor=(1, 0.5), frameon=False, fontsize=16)
     ax.set_ylabel(PLOT_SUPPLY_LABEL)
-    ax.set_ylim(charge.sum(axis=1).min() * 1.07, supply.sum(axis=1).max() * 1.07)
+    ymin = charge.sum(axis=1).min() * 1.07 if not charge.empty else 0
+    ymax = supply.sum(axis=1).max() * 1.07 if not supply.empty else 0
+    if ymin == ymax:
+        ymax = ymin + 1
+    ax.set_ylim(ymin, ymax)
     ax.grid(axis="y")
-    ax.set_xlim(supply.index.min(), supply.index.max())
+    plot_index = supply.index if not supply.empty else charge.index
+    ax.set_xlim(plot_index.min(), plot_index.max())
 
     fig.tight_layout()
 
@@ -558,6 +601,20 @@ if __name__ == "__main__":
     n = pypsa.Network(snakemake.input.network)
     fix_network_names_colors(n, snakemake.config)
 
+    annual_span = n.snapshots[-1] - n.snapshots[0]
+    plot_annual = annual_span >= pd.Timedelta(days=300)
+    if plot_annual:
+        snapshot_spacing = pd.Series(n.snapshots).diff().dropna().median()
+        annual_resample = (
+            "D"
+            if pd.notna(snapshot_spacing) and snapshot_spacing <= pd.Timedelta(hours=24)
+            else "MS"
+        )
+    else:
+        logger.warning(
+            "Network spans %s (< 300 days); skipping the annual balance plot.", annual_span
+        )
+
     for carrier in carriers:
         fig, ax = plt.subplots(figsize=(16, 8))
         plot_energy_balance(
@@ -594,6 +651,20 @@ if __name__ == "__main__":
         )
         outp = os.path.join(snakemake.output.outp_dir, f"balance_summer_{carrier}.png")
         fig.savefig(outp)
+
+        if plot_annual:
+            fig, ax = plt.subplots(figsize=(16, 8))
+            plot_energy_balance(
+                n,
+                config["plotting"],
+                bus_carrier=carrier,
+                start_date=str(n.snapshots[0]),
+                end_date=str(n.snapshots[-1]),
+                resample_freq=annual_resample,
+                ax=ax,
+            )
+            outp = os.path.join(snakemake.output.outp_dir, f"balance_annual_{carrier}.png")
+            fig.savefig(outp)
 
     ldc_ax = plot_load_duration_curve(n, carrier="AC", ax=None)
     ldc_ax.get_figure().savefig(os.path.join(snakemake.output.outp_dir, "load_duration_curve.png"))

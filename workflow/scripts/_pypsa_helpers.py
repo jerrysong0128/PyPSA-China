@@ -174,6 +174,8 @@ def calc_lcoe(
     for carr in ["coal", "gas", "coal ccs"]:
         fueled_links = n.links.query(f"carrier.str.contains('{carr}', case=False)").index
         suffix = " fuel" if carr == "gas" else ""
+        fuel_keys = n.links.loc[fueled_links, "bus0"] + suffix
+        fueled_links = fueled_links[fuel_keys.isin(n.generators.index)]
         fuel_costs = n.generators.loc[
             n.links.loc[fueled_links, "bus0"] + suffix
         ].marginal_cost.values

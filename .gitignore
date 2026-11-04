@@ -30,9 +30,16 @@ __pycache__
 /workflow/scripts/*.pdf
 /logs
 /benchmarks
+/add-on/
 /tests/derived_data/**
 !**.gitkeep
 .vscode/launch.json
 /workflow/logs/*
 .claude
 CLAUDE.md
+AGENTS.md
+
+# Industrial source downloads remain local, including original CSVs.
+/resources/data/industry/raw/**
+!/resources/data/industry/README.md
+!/resources/data/industry/sources/manifest.json
